@@ -1,0 +1,41 @@
+#json-editor {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+@media (max-width: 1023px) {
+    #json-editor {
+        height: 400px !important;
+    }
+}
+
+.pdf-renderer-container {
+    min-height: 450px;
+}
+
+@media (min-height: 855px) {
+    .pdf-renderer-container {
+        min-height: 650px;
+    }
+}
+
+/* Put this in your global CSS or scoped module */
+.ace_search {
+  font-size: 12px !important;
+  padding: 4px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  transform: scale(0.9);
+  transform-origin: top right;
+}
+
+.ace_search_form,
+.ace_replace_form {
+  padding: 4px !important;
+}
+
+.ace_search_options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
