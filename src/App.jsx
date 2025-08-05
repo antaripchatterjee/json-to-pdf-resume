@@ -160,11 +160,12 @@ function App() {
   // Handler to register and use custom font
   const handleLoadFont = (fontObj) => {
     try {
-      Font.register({ family: fontObj.family, src: fontObj.src });
+      Font.register({ ...fontObj });
       setCustomFonts(prev => [...prev, fontObj]);
-      setPdfFont(fontObj.family);
+      // setPdfFont(fontObj.family);
     } catch (e) {
-      alert('Failed to register font: ' + e.message);
+      console.warn(e)
+      throw new Error(`Failed to register font: ${fontObj.family}`);
     }
   };
 

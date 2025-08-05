@@ -8,7 +8,7 @@ const ErrorLabel = ({ errorMessage, errorSource }) => {
     <div className="inline-flex items-center gap-1 text-red-500 text-sm cursor-pointer max-w-full">
       <ExclamationTriangleIcon
         className="w-4 h-4 flex-shrink-0"
-        title={`${errorSource} says: {errorMessage}`}
+        title={`${errorSource} says: ${errorMessage}`}
       />
       <span className="truncate">{errorMessage}</span>
     </div>

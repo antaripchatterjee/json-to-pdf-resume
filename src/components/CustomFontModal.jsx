@@ -15,9 +15,6 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
   const [loading, setLoading] = useState(false);
   const [runFilter, setRunFilter] = useState(false);
   const [error, setError] = useState(null);
-  const [fontMap, setFontMap] = useState({});
-
-  const allRows = Object.values(fontMap).flat();
 
   const handleFetch = async () => {
     const parsedUrl = getUrl(fontUrl);
@@ -29,6 +26,12 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
     try {
       const fontFaces = await fetchFontFacesFromCssUrl(parsedUrl);
       if (!fontFaces.length) throw new Error("Could not find any valid font endpoints");
+      // console.log(fontFaces)
+      fontFaces.forEach(fontObj => {
+        console.log(`Registering ${fontObj.family}`);
+        onLoadFont(fontObj);
+      });
+      onClose()
       // const rows = fontFaces.flatMap((fontFace, oidx) =>
       //   console.log(fontFace) || 
       //   fontFace.font.map((props, iidx) => ({
@@ -37,15 +40,6 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
       //     ...props
       //   }))
       // );
-      const rows = fontFaces.map((fontFace, index) => ({
-        id: `${fontFace.url}-${fontFace.fontFamily}-${fontFace.fontStyle}-${fontFace.fontWeights[0]}-${fontFace.fontWeights.slice(-1)[0]}-${index}`.replace(/[^a-z0-9\-]/gi, ''),
-        ...fontFace
-      }))
-
-      setFontMap((prev) => ({
-        ...prev,
-        [parsedUrl.toString()]: rows, // replaces existing entry
-      }));
 
       setFontUrl(""); // optional: clear input
     } catch (e) {
@@ -56,11 +50,6 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLoad = (selectedFonts) => {
-    onLoadFont(selectedFonts);
-    onClose();
   };
 
   if (!isOpen) return null;
