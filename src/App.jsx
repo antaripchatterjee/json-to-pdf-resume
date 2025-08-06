@@ -162,7 +162,7 @@ function App() {
     try {
       Font.register({ ...fontObj });
       setCustomFonts(prev => [...prev, fontObj]);
-      // setPdfFont(fontObj.family);
+      setPdfFont(fontObj.family);
     } catch (e) {
       console.warn(e)
       throw new Error(`Failed to register font: ${fontObj.family}`);
@@ -172,7 +172,9 @@ function App() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-800 text-black dark:text-whitesmoke font-courier">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-6 text-theme-light-primary dark:text-theme-dark-primary">JSON to PDF Résumé</h1>
+        <h1 className="text-3xl font-bold mb-6 text-theme-light-primary dark:text-theme-dark-primary">
+          JSON to PDF Résumé
+        </h1>
         {/* Controls */}
         <div className="flex flex-wrap gap-4 items-center mb-4">
           <label className="flex flex-col text-sm font-medium w-52">

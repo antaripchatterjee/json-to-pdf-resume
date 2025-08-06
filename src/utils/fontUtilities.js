@@ -38,17 +38,8 @@ function detectFontFormatFromBytes(bytes, oneOf = null) {
 }
 
 
-async function fetchFontBlobData(urlString, format) {
-  const url = getUrl(urlString);
-  if (!url) throw new Error('Font source URL should be a valid http(s) link.');
-
-  const resp = await fetchWithTimeout(url);
-  if (!resp.ok) throw new Error(`Fetch error on ${url}`);
-
-  const contentType = resp.headers.get('Content-Type')?.toLowerCase();
-  const buffer = await resp.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-
+async function fetchFontBlobData(responseBuffer, contentType, format) {
+  const bytes = new Uint8Array(responseBuffer);
   let finalFormat = format;
 
   // Step 1: If format is "runtime", detect dynamically
@@ -93,11 +84,11 @@ async function fetchFontBlobData(urlString, format) {
 
   // Step 5: Return Blob URL
   if (finalFormat === 'woff2') {
-    const ttfBuffer = await convertWoff2ToTtf(buffer);
+    const ttfBuffer = await convertWoff2ToTtf(responseBuffer);
     const blob = new Blob([ttfBuffer], { type: targetContentType });
     return URL.createObjectURL(blob);
   } else {
-    const blob = new Blob([buffer], { type: targetContentType });
+    const blob = new Blob([responseBuffer], { type: targetContentType });
     return URL.createObjectURL(blob);
   }
 }
@@ -114,7 +105,7 @@ function getFontWeightsFromRange([start, stop]) {
   return result;
 }
 
-function parseCSSDocument(cssText) {
+function parseFontFacesFromCSSDoc(cssText) {
   const acceptedFormats = ["woff", "woff2", "truetype", "ttf", "opentype", "otf"];
   const fontFaces = [];
   const ast = csstree.parse(cssText);
@@ -186,60 +177,74 @@ function parseCSSDocument(cssText) {
   return fontFaces;
 }
 
-export async function getFontFacesFromCSS(cssText) {
-  const fontFaces = parseCSSDocument(cssText);
-  const allFontPromises = [];
+async function getFontResponseFromFirstWorkingUrl(srcSet) {
+  for (const [index, src] of srcSet.entries()) {
+    const url = getUrl(src.url);
+    if (!url) continue;
 
-  for (const { fontWeight, fontStyle, fontFamily, src } of fontFaces) {
-    const fontWeights = getFontWeightsFromRange(
-      fontWeight
-        ? fontWeight.split(/[\D]+/g, 2).map((v) => parseInt(v, 10))
-        : [400]
-    );
-
-    for (const weight of fontWeights) {
-      for (const { url, format } of src) {
-        const promise = fetchFontBlobData(url, format)
-          .then(objectUrl => ({
-            src: objectUrl,
-            fontStyle: fontStyle ?? null,
-            fontWeight: weight,
-            url,
-            fontFamily
-          }))
-          .catch(err => {
-            console.warn(`Failed to load font from ${url}`, err);
-            return null; // we will filter it out later
-          });
-
-        allFontPromises.push(promise);
-      }
+    const responsePromise = await fetchWithTimeout(url);
+    if (responsePromise.ok) {
+      return [index, responsePromise, src.format];
     }
   }
+  return [-1, { arrayBuffer: async () => null}, null]
+}
 
-  // Wait for all fonts to load in parallel
-  const resolvedFonts = (await Promise.all(allFontPromises)).filter(Boolean);
 
-  // Group by fontFamily
-  const fontMap = new Map();
-
-  for (const font of resolvedFonts) {
-    if (!fontMap.has(font.fontFamily)) {
-      fontMap.set(font.fontFamily, []);
+async function getFontFacesFromCSS(cssText) {
+  const fontFaces = parseFontFacesFromCSSDoc(cssText);
+  return await Promise.all(fontFaces.map(async ({ fontWeight, fontStyle, fontFamily, src: srcSet }) => {
+    const [index, responsePromise, format] = await getFontResponseFromFirstWorkingUrl(srcSet);
+    return {
+      fontWeights: getFontWeightsFromRange(
+        fontWeight
+          ? fontWeight.split(/[\D]+/g, 2).map((v) => parseInt(v, 10))
+          : [400]
+      ),
+      fontStyle: fontStyle ?? null,
+      fontFamily,
+      format,
+      responsePromise,
+      url: srcSet[index] ?? null
     }
-    fontMap.get(font.fontFamily).push({
-      src: font.src,
-      fontWeight: font.fontWeight,
-      fontStyle: font.fontStyle,
-      url: font.url
-    });
-  }
-
-  // Convert Map to final array
-  return Array.from(fontMap.entries()).map(([family, fonts]) => ({
-    family,
-    fonts
   }));
+}
+
+async function fetchFontFaces(fontFaces) {
+  return await fontFaces.reduce(async (accPromise, fontFace) => {
+    const { responsePromise, format, fontWeights } = fontFace;
+    const contentType = responsePromise?.headers?.get('Content-Type')?.toLowerCase();
+    const responseData = await responsePromise.arrayBuffer();
+    if(!format || !contentType || !responseData) {
+      console.warn('Could not download the font data')
+      return await accPromise;
+    }
+    const src = await fetchFontBlobData(responseData, contentType, format)
+      .catch(e => console.warn(e) ?? null);
+    const fonts = await Promise.all(fontWeights.map(async fontWeight => {
+      return {
+        src,
+        fontStyle: fontFace.fontStyle,
+        fontWeight,
+        url: fontFace.url,
+      }
+    }).filter(({ src }) => src !== null)
+    );
+    const acc = await accPromise;
+
+    const existing = acc.find(
+      (item) => item.family === fontFace.fontFamily
+    );
+    if (existing) {
+      existing.fonts.push(...fonts);
+    } else {
+      acc.push({
+        family: fontFace.fontFamily,
+        fonts: [...fonts],
+      });
+    }
+    return acc;
+  }, Promise.resolve([]));
 }
 
 export async function fetchFontFacesFromCssUrl(url) {
@@ -253,6 +258,7 @@ export async function fetchFontFacesFromCssUrl(url) {
     throw new Error("Not a CSS link");
   }
   const cssText = await response.text();
-  const fonts = await getFontFacesFromCSS(cssText, url.toString());
+  const fontFaces = await getFontFacesFromCSS(cssText);
+  const fonts = await fetchFontFaces(fontFaces);
   return fonts;
 }

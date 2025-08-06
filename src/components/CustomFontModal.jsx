@@ -16,7 +16,7 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
   const [runFilter, setRunFilter] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleFetch = async () => {
+  const handleFetch = async (runFilter) => {
     const parsedUrl = getUrl(fontUrl);
     if (!parsedUrl) return;
 
@@ -26,21 +26,12 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
     try {
       const fontFaces = await fetchFontFacesFromCssUrl(parsedUrl);
       if (!fontFaces.length) throw new Error("Could not find any valid font endpoints");
-      // console.log(fontFaces)
+      console.log(fontFaces)
       fontFaces.forEach(fontObj => {
         console.log(`Registering ${fontObj.family}`);
         onLoadFont(fontObj);
       });
-      onClose()
-      // const rows = fontFaces.flatMap((fontFace, oidx) =>
-      //   console.log(fontFace) || 
-      //   fontFace.font.map((props, iidx) => ({
-      //     id: `${props.url.replace(/[^a-z0-9]/gi, '')}-${props.fontWeight}-${props.fontStyle}-${oidx}-${iidx}`,
-      //     family: fontFace.family,
-      //     ...props
-      //   }))
-      // );
-
+      onClose();
       setFontUrl(""); // optional: clear input
     } catch (e) {
       setError({
@@ -98,7 +89,7 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
             />
           </div>
           <IconButton
-            onClick={handleFetch}
+            onClick={() => handleFetch(runFilter)}
             disabled={loading || !getUrl(fontUrl)}
             label={loading ? "Loading" : "Get Fonts"}
             icon={loading 
