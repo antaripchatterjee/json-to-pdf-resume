@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ArrowPathIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
-import LabelWithTooltip from './LabelWithTooltip';
+// import LabelWithTooltip from './LabelWithTooltip';
 import IconButton from "./IconButton";
 import ErrorLabel from "./ErrorLabel";
 
@@ -13,7 +13,7 @@ import { fetchFontFacesFromCssUrl } from "../utils/fontUtilities";
 export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
   const [fontUrl, setFontUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [runFilter, setRunFilter] = useState(false);
+  // const [runFilter, setRunFilter] = useState(false);
   const [error, setError] = useState(null);
 
   const handleFetch = async (runFilter) => {
@@ -75,7 +75,7 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
         </div>
 
         <div className="flex justify-end gap-3 mb-4 relative">
-          <div className="flex gap-1 absolute left-0">
+          {/*<div className="flex gap-1 absolute left-0">
             <input
               type="checkbox"
               value={runFilter}
@@ -87,7 +87,7 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
               tooltip="Filter font faces by URL query parameters"
               className="mt-0.5 p-1 items-center text-xs text-gray-700 dark:text-gray-200"
             />
-          </div>
+          </div>*/}
           <IconButton
             onClick={() => handleFetch(runFilter)}
             disabled={loading || !getUrl(fontUrl)}

@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { PDFViewer, Font } from '@react-pdf/renderer';
+import { Font } from '@react-pdf/renderer';
+import PDFContainer from './components/PDFContainer';
 
-import ResumeRenderer from './components/ResumeRenderer';
+
 import { handleFileUpload } from './utils/handleFileUpload';
 import { downloadJSON } from './utils/downloadJSON';
 
@@ -153,9 +154,6 @@ function App() {
       };
     }
   }, [colorMode])
-
-
-  
   
   // Handler to register and use custom font
   const handleLoadFont = (fontObj) => {
@@ -291,19 +289,8 @@ function App() {
               Save JSON
             </button>
           </div>
-          <div className="flex-1 flex items-center justify-center bg-gray-700 rounded-lg shadow pdf-renderer-container">
-            {renderPDF ? (
-              parsedData ? (
-                <PDFViewer style={{ width: '100%', height: '100%', border: "none" }}>
-                  <ResumeRenderer data={parsedData} fontFamily={pdfFont} />
-                </PDFViewer>
-              ) : (
-                <div className="text-xl font-bold text-gray-600">No PDF content available to display</div>
-              )
-            ) : (
-              <div className="text-xl font-bold text-gray-600">PDF rendering is disabled.</div>
-            )}
-          </div>
+          <PDFContainer renderPDF={renderPDF} parsedData={parsedData} pdfFont={pdfFont} />
+          
         </div>
         <div className="flex flex-col lg:flex-row gap-6 mb-4">
             <button
