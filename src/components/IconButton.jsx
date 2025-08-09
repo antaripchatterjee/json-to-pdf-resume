@@ -12,7 +12,7 @@ export default function IconButton({
   return (
     <button
       className={clsx(
-        "bg-theme-light-primary dark:bg-theme-dark-primary text-white font-semibold px-4 py-2 rounded hover:bg-blue-900 dark:hover:bg-blue-600 transition disabled:opacity-50 inline-flex items-center gap-2",
+        "bg-theme-light-primary dark:bg-theme-dark-primary text-white font-semibold px-4 py-2 rounded hover:bg-blue-900 dark:hover:bg-blue-600 transition inline-flex items-center justify-center gap-2 disabled:opacity-50",
         props?.className ?? ""
       )}
       {...removeKeyImmutable(props, 'className')}

@@ -89,7 +89,7 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
             />
           </div>*/}
           <IconButton
-            onClick={() => handleFetch(runFilter)}
+            onClick={() => handleFetch(/*runFilter*/)}
             disabled={loading || !getUrl(fontUrl)}
             label={loading ? "Loading" : "Get Fonts"}
             icon={loading 

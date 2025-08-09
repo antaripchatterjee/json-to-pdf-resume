@@ -14,6 +14,8 @@ import CustomFontModal from './components/CustomFontModal';
 
 import './App.css';
 import ToggleButton from './components/ToggleButton';
+import IconButton from './components/IconButton';
+import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 
 const BOILERPLATES = {
   '!xyz': `{
@@ -52,7 +54,7 @@ const themes = [
   'merbivore', 'nord_dark', 'textmate', 'monokai', 'xcode', 'twilight', 'terminal'
 ];
 
-const colorModes = ['system', 'light', 'dark'];
+const appearances = ['system', 'light', 'dark'];
 
 const availableFonts = [
   {family: 'Times-Roman'},
@@ -71,7 +73,7 @@ const availableFonts = [
 function App() {
   const localRemember = (localStorage.getItem('userChoice.rememberChoices') ?? 'false') == 'true'; 
 
-  const [colorMode, setColorMode] = useState(colorModes[0]); // 'light', 'dark', or 'system'
+  const [appearance, setAppearance] = useState(appearances[0]); // 'light', 'dark', or 'system'
 
   const [jsonContent, setJsonContent] = useState('');
   const [parsedData, setParsedData] = useState(null);
@@ -99,7 +101,7 @@ function App() {
         const localEditorFontSize = parseInt(localStorage.getItem('userChoice.aceEditorFontSize'), 10);
         const localPdfFont = localStorage.getItem('userChoice.pdfFont');
         const localRenderPDF = localStorage.getItem('userChoice.renderPDF');
-        const localColorMode = localStorage.getItem('userChoice.colorMode');
+        const localAppearance = localStorage.getItem('userChoice.appearance');
         if (localJson) {
           setJsonContent(localJson);
           try {
@@ -112,13 +114,13 @@ function App() {
         if (!Number.isNaN(localEditorFontSize) && localEditorFontSize >= 10 && localEditorFontSize <= 40) setEditorFontSize(parseInt(localEditorFontSize, 10));
         if (localPdfFont) setPdfFont(localPdfFont);
         if (localRenderPDF !== null) setRenderPDF(localRenderPDF === "true");
-        if (localColorMode && colorModes.includes(localColorMode)) setColorMode(localColorMode);
+        if (localAppearance && appearances.includes(localAppearance)) setAppearance(localAppearance);
       } else {
         localStorage.setItem('userChoice.aceEditorTheme', editorTheme);
         localStorage.setItem('userChoice.aceEditorFontSize', editorFontSize);
         localStorage.setItem('userChoice.pdfFont', pdfFont);
         localStorage.setItem('userChoice.renderPDF', renderPDF);
-        localStorage.setItem('userChoice.colorMode', colorMode);
+        localStorage.setItem('userChoice.appearance', appearance);
         localStorage.setItem('userChoice.rememberChoices', 'true');
       }
     } else {
@@ -129,31 +131,31 @@ function App() {
       localStorage.removeItem('userChoice.aceEditorFontSize');
       localStorage.removeItem('userChoice.pdfFont');
       localStorage.removeItem('userChoice.renderPDF');
-      localStorage.removeItem('userChoice.colorMode');
+      localStorage.removeItem('userChoice.appearance');
       localStorage.removeItem('userChoice.rememberChoices');
     }
-  }, [rememberChoices, editorTheme, editorFontSize, pdfFont, renderPDF, colorMode]);
+  }, [rememberChoices, editorTheme, editorFontSize, pdfFont, renderPDF, appearance]);
 
   useEffect(() => {
     const root = document.documentElement;
     const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 
     const applyTheme = () => {
-      const isDark = colorMode === "dark"
-        || (colorMode === "system" && systemPrefersDark.matches);
+      const isDark = appearance === "dark"
+        || (appearance === "system" && systemPrefersDark.matches);
       root.classList.toggle("dark", isDark);
     };
 
     applyTheme(); // initial application
 
     // Listen to system theme changes only if "system" is selected
-    if (colorMode === "system") {
+    if (appearance === "system") {
       systemPrefersDark.addEventListener("change", applyTheme);
       return () => {
         systemPrefersDark.removeEventListener("change", applyTheme);
       };
     }
-  }, [colorMode])
+  }, [appearance])
   
   // Handler to register and use custom font
   const handleLoadFont = (fontObj) => {
@@ -252,24 +254,25 @@ function App() {
           <ToggleButton
             label="Render PDF"
             checked={renderPDF}
-            onChange={(e) => setRenderPDF(e.target.value)}
+            onChange={(e) => setRenderPDF(!renderPDF)}
           />
           <label className="flex flex-col text-sm font-medium">
-            <span>Select Color Mode</span>
+            <span>Select Appearance</span>
             <select
               className="mt-1 border border-gray-300 rounded px-2 py-1 capitalize bg-white text-black dark:bg-black dark:text-whitesmoke"
-              value={colorMode}
-              onChange={e => setColorMode(e.target.value)}
-            >{colorModes.map((mode) => (
-              <option key={mode} value={mode} className='capitalize'>
-                {mode}
+              value={appearance}
+              onChange={e => setAppearance(e.target.value)}
+            >{appearances.map((appearance) => (
+              <option key={appearance} value={appearance} className='capitalize'>
+                {appearance}
               </option>
             ))}</select>
           </label>
           <ToggleButton 
-            label="Remember Choices"
+            label="Remember Me"
+            tooltip="Information will be stored in the browser."
             checked={rememberChoices}
-            onChange={e => setRememberChoices(e.target.checked)}
+            onChange={e => setRememberChoices(!rememberChoices)}
           />
         </div>
         {/* Main Content */}
@@ -282,23 +285,26 @@ function App() {
               setValue={setJsonContent}
               setObject={setParsedData}
             />
-            <button
-              className="bg-theme-light-primary dark:bg-theme-dark-primary text-white px-4 py-2 my-2 w-full rounded font-semibold hover:bg-blue-900 transition lg:hidden"
+            <IconButton
+              className="my-2 w-full lg:hidden"
               onClick={() => downloadJSON(jsonContent, editorTheme, editorFontSize)}
-            >
-              Save JSON
-            </button>
+              icon={<ArrowDownOnSquareIcon className='h-6 w-4' />}
+              label="Save JSON"
+            />
           </div>
-          <PDFContainer renderPDF={renderPDF} parsedData={parsedData} pdfFont={pdfFont} />
-          
+          <PDFContainer 
+            renderPDF={renderPDF}
+            parsedData={parsedData}
+            pdfFont={pdfFont}
+          />
         </div>
         <div className="flex flex-col lg:flex-row gap-6 mb-4">
-            <button
-              className="bg-theme-light-primary dark:bg-theme-dark-primary text-white px-4 py-2 my-2 w-full rounded font-semibold hover:bg-blue-900 transition not-lg:hidden"
+            <IconButton
+              className="my-2 w-full not-lg:hidden"
               onClick={() => downloadJSON(jsonContent, editorTheme, editorFontSize)}
-            >
-              Save JSON
-            </button>
+              icon={<ArrowDownOnSquareIcon className='h-6 w-4' />}
+              label="Save JSON"
+            />
             <button
               className="bg-theme-light-primary dark:bg-theme-dark-primary text-white px-4 py-2 my-2 w-full rounded font-semibold hover:bg-blue-900 transition"
               onClick={() => 0}
