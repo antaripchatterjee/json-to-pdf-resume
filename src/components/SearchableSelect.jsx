@@ -135,6 +135,7 @@ export default function SearchableSelect({
           className="mt-1 w-full border border-gray-300 rounded px-2 py-1 capitalize bg-white text-black dark:bg-black dark:text-whitesmoke relative z-20 font-medium"
           placeholder={currentSuggestion ? null : placeholder}
           value={query}
+          enterKeyHint="next"
           onFocus={(e) => {
             if (!e.target.value.length) setCurrentSuggestion("");
             setQuery(e.target.value);
