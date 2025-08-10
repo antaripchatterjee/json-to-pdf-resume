@@ -26,9 +26,7 @@ export default function CustomFontModal({ isOpen, onClose, onLoadFont }) {
     try {
       const fontFaces = await fetchFontFacesFromCssUrl(parsedUrl);
       if (!fontFaces.length) throw new Error("Could not find any valid font endpoints");
-      console.log(fontFaces)
       fontFaces.forEach(fontObj => {
-        console.log(`Registering ${fontObj.family}`);
         onLoadFont(fontObj);
       });
       onClose();

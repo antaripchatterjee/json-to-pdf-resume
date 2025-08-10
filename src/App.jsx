@@ -81,7 +81,7 @@ function App() {
   const [editorFontSize, setEditorFontSize] = useState(16);
 
   // PDF-only state
-  const [pdfFont, setPdfFont] = useState(availableFonts[0].family);
+  const [pdfFont, setPdfFont] = useState("");
   const [renderPDF, setRenderPDF] = useState(true);
   const [showCustomFontModal, setShowCustomFontModal] = useState(false);
   const [customFonts, setCustomFonts] = useState([]);
@@ -110,7 +110,11 @@ function App() {
         }
         if (localThemeName && themes.includes(localThemeName)) setEditorTheme(localThemeName);
         if (!Number.isNaN(localEditorFontSize) && localEditorFontSize >= 10 && localEditorFontSize <= 40) setEditorFontSize(parseInt(localEditorFontSize, 10));
-        if (localPdfFont) setPdfFont(localPdfFont);
+        if (localPdfFont) {
+          setPdfFont(localPdfFont);
+        } else {
+          setPdfFont(availableFonts[0].family)
+        }
         if (localRenderPDF !== null) setRenderPDF(localRenderPDF === "true");
         if (localAppearance && appearances.includes(localAppearance)) setAppearance(localAppearance);
       } else {
@@ -159,7 +163,10 @@ function App() {
   const handleLoadFont = (fontObj) => {
     try {
       Font.register({ ...fontObj });
-      setCustomFonts(prev => [...prev, fontObj]);
+      setCustomFonts(prev => [
+        ...prev, 
+        {family: fontObj.family}
+      ]);
       setPdfFont(fontObj.family);
     } catch (e) {
       console.warn(e)
@@ -215,9 +222,8 @@ function App() {
               ))}
             </select>
           </label>
-          <SearchableSelect
+          {pdfFont && <SearchableSelect
             label="Select Font"
-            value={pdfFont}
             onChange={async ({ selectedIndex, selectedOption }) => {
               if(selectedIndex === 0 && selectedOption.value === 'add-new-font') {
                 setShowCustomFontModal(true)
@@ -237,11 +243,11 @@ function App() {
             ].map(option => ({
               ...option,
               label: option.family.replace(/[\W]+/g, ' '),
-              value: option.family
+              value: option.family,
+              selected: (option.selectable ?? true) && (option.family === pdfFont)
             }))}
             optionKeyPrefix="font-family"
-            placeholder="Search font"
-          />
+          />}
           <ToggleButton
             label="Render PDF"
             checked={renderPDF}

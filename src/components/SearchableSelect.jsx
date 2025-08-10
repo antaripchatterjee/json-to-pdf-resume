@@ -9,14 +9,19 @@ export default function SearchableSelect({
   placeholder = "Search...",
   size = 10
 }) {
-  const firstSelectableIndex = options?.findIndex(option => 
+  const firstSelectableIndex = options.findIndex(option => 
     option?.selectable !== false) || 0;
+  const initialQueryValue = (options.find(option => option.selected) || options[firstSelectableIndex])?.label ?? "";
   const [query, setQuery] = useState("");
   const [isListBoxOpen, setIsListBoxOpen] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState([...options]);
   const [currentSuggestion, setCurrentSuggestion] = useState("");
   const inputRef = useRef(null);
   const selectRef = useRef(null);
+
+  useEffect(() => {
+    setQuery(initialQueryValue)
+  }, [initialQueryValue])
 
   // Filter when query changes
   useEffect(() => {
@@ -34,7 +39,7 @@ export default function SearchableSelect({
 
     setFilteredOptions(filtered);
     setCurrentSuggestion(suggestion);
-  }, [query, options]);
+  }, [query]);
 
   useEffect(() => {
     if (!isListBoxOpen) {
@@ -48,7 +53,10 @@ export default function SearchableSelect({
     onChange({
       selectedIndex: e.target.selectedIndex,
       selectedOption
-    }).then(v => v && v.query && setQuery(v.query));
+    }).then(v => {
+      if(v && v.query) {
+        setQuery(v.query)}
+    });
   }
 
   function handleOptionSelection(e) {
@@ -71,7 +79,7 @@ export default function SearchableSelect({
           ? filteredOptions.length - 1
           : e.target.selectedIndex - 1;
       changeSuggestion = true;
-    } else if (e.type === "keydown" && e.key === "Enter") {
+    } else if (e.type === "keydown" && (e.key === "Enter" || e.key === "Tab")) {
       e.preventDefault();
       changeOption = true;
     }
@@ -123,7 +131,7 @@ export default function SearchableSelect({
           </select>
         )}
 
-        {currentSuggestion && (
+        {currentSuggestion && isListBoxOpen && (
           <span className="mt-[5px] ml-[0.8px] absolute top-1 left-2 text-gray-700 pointer-events-none select-none z-30">
             {currentSuggestion}
           </span>
