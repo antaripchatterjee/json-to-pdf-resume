@@ -1,16 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Font } from '@react-pdf/renderer';
-import PDFContainer from './components/PDFContainer';
 
 
 import { handleFileUpload } from './utils/handleFileUpload';
 import { downloadJSON } from './utils/downloadJSON';
 
+import SearchableSelect from './components/SearchableSelect';
 import JSONEditor from './components/JSONEditor';
 import CustomFontModal from './components/CustomFontModal';
-// import CustomFontsProvider from './components/CustomFontsProvider';
-
-// import { useCustomFonts } from './components/hooks/useCustomFonts';
+import PDFContainer from './components/PDFContainer';
 
 import './App.css';
 import ToggleButton from './components/ToggleButton';
@@ -50,28 +48,28 @@ const BOILERPLATES = {
 // });
 
 const themes = [
-  'github', 'tomorrow_night', 'solarized_dark', 'kuroir', 'dracula', 'katzenmilch', 
+  'github', 'tomorrow_night', 'solarized_dark', 'kuroir', 'dracula', 'katzenmilch',
   'merbivore', 'nord_dark', 'textmate', 'monokai', 'xcode', 'twilight', 'terminal'
 ];
 
 const appearances = ['system', 'light', 'dark'];
 
 const availableFonts = [
-  {family: 'Times-Roman'},
-  {family: 'Courier'},
-  {family: 'Courier-Bold'},
-  {family: 'Courier-Oblique'},
-  {family: 'Courier-BoldOblique'},
-  {family: 'Helvetica'},
-  {family: 'Helvetica-Bold'},
-  {family: 'Helvetica-Oblique'},
-  {family: 'Helvetica-BoldOblique'},
-  {family: 'Times-Bold'},
-  {family: 'Times-Italic'},
-  {family: 'Times-BoldItalic'},
-  ]
+  { family: 'Times-Roman' },
+  { family: 'Courier' },
+  { family: 'Courier-Bold' },
+  { family: 'Courier-Oblique' },
+  { family: 'Courier-BoldOblique' },
+  { family: 'Helvetica' },
+  { family: 'Helvetica-Bold' },
+  { family: 'Helvetica-Oblique' },
+  { family: 'Helvetica-BoldOblique' },
+  { family: 'Times-Bold' },
+  { family: 'Times-Italic' },
+  { family: 'Times-BoldItalic' },
+]
 function App() {
-  const localRemember = (localStorage.getItem('userChoice.rememberChoices') ?? 'false') == 'true'; 
+  const localRemember = (localStorage.getItem('userChoice.rememberChoices') ?? 'false') == 'true';
 
   const [appearance, setAppearance] = useState(appearances[0]); // 'light', 'dark', or 'system'
 
@@ -90,10 +88,10 @@ function App() {
   const [rememberChoices, setRememberChoices] = useState(localRemember);
 
   const isFirstMount = useRef(true);
-  
+
   useEffect(() => {
     if (rememberChoices) {
-      if(isFirstMount.current) {
+      if (isFirstMount.current) {
         isFirstMount.current = false;
         // Load all values from localStorage
         const localJson = localStorage.getItem('userChoice.resumeDataContent');
@@ -156,7 +154,7 @@ function App() {
       };
     }
   }, [appearance])
-  
+
   // Handler to register and use custom font
   const handleLoadFont = (fontObj) => {
     try {
@@ -217,40 +215,33 @@ function App() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col text-sm font-medium">
-            <span>Select PDF Font</span>
-            <select
-              className="mt-1 border border-gray-300 rounded px-2 py-1 capitalize bg-white text-black dark:bg-black dark:text-whitesmoke"
-              value={pdfFont}
-              onChange={e => {
-                e.preventDefault();
-                const selectedOption = e.target.children[e.target.selectedIndex];
-                if(selectedOption.getAttribute('data-action-after-select') === 'open-font-modal') {
-                  setShowCustomFontModal(true);
-                } else {
-                  setShowCustomFontModal(false);
-                  setPdfFont(e.target.value);
-                }
-              }}>
-              {[
-                {family: 'add-new-font'}, 
-                ...availableFonts, 
-                ...customFonts
-              ].map((font, index) => (
-                <option 
-                  key={`font-family-${index}`} 
-                  value={font.family} 
-                  className="capitalize"
-                  {...{
-                    'data-action-after-select': index === 0 
-                      ? 'open-font-modal' : 'set-pdf-font'
-                  }}
-                  >
-                  {font.family.split(/[\W]+/g).join(' ')}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SearchableSelect
+            label="Select Font"
+            value={pdfFont}
+            onChange={async ({ selectedIndex, selectedOption }) => {
+              if(selectedIndex === 0 && selectedOption.value === 'add-new-font') {
+                setShowCustomFontModal(true)
+              } else {
+                setShowCustomFontModal(false);
+                setPdfFont(selectedOption.value);
+                return {
+                  query: selectedOption.value.replace(/[\W]+/g, ' ')
+                };
+              }
+              return null;
+            }}
+            options={[
+              { family: "add-new-font", selectable: false },
+              ...availableFonts,
+              ...customFonts
+            ].map(option => ({
+              ...option,
+              label: option.family.replace(/[\W]+/g, ' '),
+              value: option.family
+            }))}
+            optionKeyPrefix="font-family"
+            placeholder="Search font"
+          />
           <ToggleButton
             label="Render PDF"
             checked={renderPDF}
@@ -268,7 +259,7 @@ function App() {
               </option>
             ))}</select>
           </label>
-          <ToggleButton 
+          <ToggleButton
             label="Remember Me"
             tooltip="Information will be stored in the browser."
             checked={rememberChoices}
@@ -292,25 +283,25 @@ function App() {
               label="Save JSON"
             />
           </div>
-          <PDFContainer 
+          <PDFContainer
             renderPDF={renderPDF}
             parsedData={parsedData}
             pdfFont={pdfFont}
           />
         </div>
         <div className="flex flex-col lg:flex-row gap-6 mb-4">
-            <IconButton
-              className="my-2 w-full not-lg:hidden"
-              onClick={() => downloadJSON(jsonContent, editorTheme, editorFontSize)}
-              icon={<ArrowDownOnSquareIcon className='h-6 w-4' />}
-              label="Save JSON"
-            />
-            <button
-              className="bg-theme-light-primary dark:bg-theme-dark-primary text-white px-4 py-2 my-2 w-full rounded font-semibold hover:bg-blue-900 transition"
-              onClick={() => 0}
-            >
-              Download PDF
-            </button>
+          <IconButton
+            className="my-2 w-full not-lg:hidden"
+            onClick={() => downloadJSON(jsonContent, editorTheme, editorFontSize)}
+            icon={<ArrowDownOnSquareIcon className='h-6 w-4' />}
+            label="Save JSON"
+          />
+          <button
+            className="bg-theme-light-primary dark:bg-theme-dark-primary text-white px-4 py-2 my-2 w-full rounded font-semibold hover:bg-blue-900 transition"
+            onClick={() => 0}
+          >
+            Download PDF
+          </button>
         </div>
         <CustomFontModal
           isOpen={showCustomFontModal}
