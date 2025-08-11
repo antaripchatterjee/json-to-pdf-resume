@@ -14,6 +14,8 @@ import './App.css';
 import ToggleButton from './components/ToggleButton';
 import IconButton from './components/IconButton';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import Branding from './components/navber/Branding';
+import TabContainer from './components/tab/TabContainer';
 
 const BOILERPLATES = {
   '!xyz': `{
@@ -164,8 +166,8 @@ function App() {
     try {
       Font.register({ ...fontObj });
       setCustomFonts(prev => [
-        ...prev, 
-        {family: fontObj.family}
+        ...prev,
+        { family: fontObj.family }
       ]);
       setPdfFont(fontObj.family);
     } catch (e) {
@@ -175,145 +177,12 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-800 text-black dark:text-whitesmoke font-courier">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-6 text-theme-light-primary dark:text-theme-dark-primary">
-          JSON to PDF Résumé
-        </h1>
-        {/* Controls */}
-        <div className="flex flex-wrap gap-4 items-center mb-4">
-          <label className="flex flex-col text-sm font-medium w-52">
-            <span>Upload A JSON</span>
-            <input
-              type="file"
-              accept=".json"
-              className="mt-1 border border-gray-300 rounded px-2 py-1 bg-white text-black dark:bg-black dark:text-whitesmoke"
-              onChange={e => handleFileUpload(e, setJsonContent, setParsedData)}
-            />
-          </label>
-          <label className="flex flex-col text-sm font-medium">
-            <span>Font Size</span>
-            <input
-              type="number"
-              min="10"
-              max="40"
-              step="1"
-              className="mt-1 border border-gray-300 rounded px-2 py-1 w-20 bg-white text-black dark:bg-black dark:text-whitesmoke"
-              value={editorFontSize}
-              onChange={e => {
-                const size = parseInt(e.target.value, 10);
-                if (!Number.isNaN(size) && size >= 10 && size <= 40) {
-                  setEditorFontSize(size);
-                }
-              }}
-            />
-          </label>
-          <label className="flex flex-col text-sm font-medium">
-            <span>Select Editor Theme</span>
-            <select
-              className="mt-1 border border-gray-300 rounded px-2 py-1 capitalize bg-white text-black dark:bg-black dark:text-whitesmoke"
-              value={editorTheme}
-              onChange={e => setEditorTheme(e.target.value)}
-            >
-              {themes.map((theme) => (
-                <option key={theme} value={theme} className='capitalize'>
-                  {theme.split(/[_]+/g).join(' ')}
-                </option>
-              ))}
-            </select>
-          </label>
-          {pdfFont && <SearchableSelect
-            label="Select Font"
-            onChange={async ({ selectedIndex, selectedOption }) => {
-              if(selectedIndex === 0 && selectedOption.value === 'add-new-font') {
-                setShowCustomFontModal(true)
-              } else {
-                setShowCustomFontModal(false);
-                setPdfFont(selectedOption.value);
-                return {
-                  query: selectedOption.value.replace(/[\W]+/g, ' ')
-                };
-              }
-              return null;
-            }}
-            options={[
-              { family: "add-new-font", selectable: false },
-              ...availableFonts,
-              ...customFonts
-            ].map(option => ({
-              ...option,
-              label: option.family.replace(/[\W]+/g, ' '),
-              value: option.family,
-              selected: (option.selectable ?? true) && (option.family === pdfFont)
-            }))}
-            optionKeyPrefix="font-family"
-          />}
-          <ToggleButton
-            label="Render PDF"
-            checked={renderPDF}
-            onChange={(e) => setRenderPDF(!renderPDF)}
-          />
-          <label className="flex flex-col text-sm font-medium">
-            <span>Select Appearance</span>
-            <select
-              className="mt-1 border border-gray-300 rounded px-2 py-1 capitalize bg-white text-black dark:bg-black dark:text-whitesmoke"
-              value={appearance}
-              onChange={e => setAppearance(e.target.value)}
-            >{appearances.map((appearance) => (
-              <option key={appearance} value={appearance} className='capitalize'>
-                {appearance}
-              </option>
-            ))}</select>
-          </label>
-          <ToggleButton
-            label="Remember Me"
-            tooltip="Information will be stored in the browser."
-            checked={rememberChoices}
-            onChange={e => setRememberChoices(!rememberChoices)}
-          />
+    <div className="max-w-screen min-w-screen min-h-screen max-h-screen bg-white dark:bg-gray-800 text-black dark:text-whitesmoke">
+      <div className="w-screen h-screen mx-auto px-4 py-2">
+        <Branding />
+        <div className='w-full h-[86%] bg-white border border-gray-300'>
+          <TabContainer />
         </div>
-        {/* Main Content */}
-        <div className="flex min-h-full flex-col lg:flex-row gap-6">
-          <div className="flex-1 w-full min-h-full bg-white dark:bg-gray-800 rounded-lg shadow">
-            <JSONEditor
-              value={jsonContent}
-              theme={editorTheme}
-              fontSize={editorFontSize}
-              setValue={setJsonContent}
-              setObject={setParsedData}
-            />
-            <IconButton
-              className="my-2 w-full lg:hidden"
-              onClick={() => downloadJSON(jsonContent, editorTheme, editorFontSize)}
-              icon={<ArrowDownOnSquareIcon className='h-6 w-4' />}
-              label="Save JSON"
-            />
-          </div>
-          <PDFContainer
-            renderPDF={renderPDF}
-            parsedData={parsedData}
-            pdfFont={pdfFont}
-          />
-        </div>
-        <div className="flex flex-col lg:flex-row gap-6 mb-4">
-          <IconButton
-            className="my-2 w-full not-lg:hidden"
-            onClick={() => downloadJSON(jsonContent, editorTheme, editorFontSize)}
-            icon={<ArrowDownOnSquareIcon className='h-6 w-4' />}
-            label="Save JSON"
-          />
-          <button
-            className="bg-theme-light-primary dark:bg-theme-dark-primary text-white px-4 py-2 my-2 w-full rounded font-semibold hover:bg-blue-900 transition"
-            onClick={() => 0}
-          >
-            Download PDF
-          </button>
-        </div>
-        <CustomFontModal
-          isOpen={showCustomFontModal}
-          onClose={() => setShowCustomFontModal(false)}
-          onLoadFont={handleLoadFont}
-        />
       </div>
     </div>
   );
