@@ -39,3 +39,27 @@
   flex-wrap: wrap;
   gap: 4px;
 }
+
+.tab-btn {
+  clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+}
+
+.tab-btn:first-of-type {
+  clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 0% 100%) !important;
+}
+
+.tab-btn:nth-last-of-type(1) {
+  clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%) !important;
+}
+
+.tab-btn:first-of-type:nth-last-of-type(1) {
+  clip-path: unset !important;
+}
+
+.tab-btn:not(:first-of-type) {
+  margin-left: -16px;
+}
+
+.tab-btn:hover span {
+  display: block;
+}
