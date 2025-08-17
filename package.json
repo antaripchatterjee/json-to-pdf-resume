@@ -17,11 +17,14 @@
     "ace-builds": "^1.43.2",
     "css-tree": "^3.1.0",
     "d3": "^7.9.0",
+    "dexie": "^4.0.11",
+    "dexie-react-hooks": "^1.1.7",
     "react": "^19.1.0",
     "react-ace": "^14.0.1",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11",
-    "woff2-encoder": "^2.0.0"
+    "woff2-encoder": "^2.0.0",
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

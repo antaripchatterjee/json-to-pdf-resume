@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
 
-function TabMenu({ x, y, isOpen, onClose }) {
-  // close menu on outside click or ESC
+
+function TabMenu({ menuPos, isOpen, onClose }) {
+
   useEffect(() => {
     const handleClick = () => onClose();
     const handleEsc = (e) => e.key === "Escape" && onClose();
@@ -22,43 +23,58 @@ function TabMenu({ x, y, isOpen, onClose }) {
 
   return (
     <div
-      style={{ bottom: y, left: x }}
-      className={clsx(
-        "absolute z-50 w-40 rounded-lg shadow-lg border",
+      className={clsx("fixed z-50 w-44 rounded-lg shadow-lg border",
         "bg-white border-gray-200 text-gray-800",
-        "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
-      )}
+        "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100")}
+      style={{ 
+        top: `${menuPos.y - 160}px`, 
+        left: `${Math.max(20, menuPos.x - 176)}px` 
+      }}
     >
-      <ul className="py-1">
-        <li
-          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-          onClick={() => {
-            console.log("New Resume");
-            onClose();
-          }}
-        >
-          New Resume
-        </li>
-        <hr className="border-gray-200 dark:border-gray-700" />
-        <li
-          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-          onClick={() => {
-            console.log("Settings");
-            onClose();
-          }}
-        >
-          Settings
-        </li>
-        <li
-          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-          onClick={() => {
-            console.log("Help");
-            onClose();
-          }}
-        >
-          Help
-        </li>
-      </ul>
+      <button
+        className={clsx("block w-full text-left px-4 py-2 text-sm", 
+          "hover:bg-gray-100 dark:hover:bg-gray-700")}
+        onClick={() => {
+          console.log("Home")
+          onClose()
+        }}
+      >
+        Home
+      </button>
+      <button
+        className={clsx("block w-full text-left px-4 py-2 text-sm", 
+          "hover:bg-gray-100 dark:hover:bg-gray-700")}
+        onClick={() => {
+          console.log("New Resume clicked")
+          onClose()
+        }}
+      >
+        New Resume
+      </button>
+
+      <hr className="my-1 border-gray-300 dark:border-gray-600" />
+
+      <button
+        className={clsx("block w-full text-left px-4 py-2 text-sm", 
+          "hover:bg-gray-100 dark:hover:bg-gray-700")}
+        onClick={() => {
+          console.log("Settings clicked")
+          onClose()
+        }}
+      >
+        Settings
+      </button>
+
+      <button
+        className={clsx("block w-full text-left px-4 py-2 text-sm", 
+          "hover:bg-gray-100 dark:hover:bg-gray-700")}
+        onClick={() => {
+          console.log("Help clicked")
+          onClose()
+        }}
+      >
+        Help
+      </button>
     </div>
   );
 }
