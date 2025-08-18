@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
+import { useNavigate } from "react-router";
 
 
 function TabMenu({ menuPos, isOpen, onClose }) {
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClick = () => onClose();
@@ -21,6 +23,7 @@ function TabMenu({ menuPos, isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+
   return (
     <div
       className={clsx("fixed z-50 w-44 rounded-lg shadow-lg border",
@@ -35,8 +38,8 @@ function TabMenu({ menuPos, isOpen, onClose }) {
         className={clsx("block w-full text-left px-4 py-2 text-sm", 
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
-          console.log("Home")
-          onClose()
+          onClose();
+          navigate('/tabs/home');
         }}
       >
         Home
@@ -45,8 +48,8 @@ function TabMenu({ menuPos, isOpen, onClose }) {
         className={clsx("block w-full text-left px-4 py-2 text-sm", 
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
-          console.log("New Resume clicked")
-          onClose()
+          onClose();
+          // navigate('/tabs/home');
         }}
       >
         New Resume
@@ -58,8 +61,8 @@ function TabMenu({ menuPos, isOpen, onClose }) {
         className={clsx("block w-full text-left px-4 py-2 text-sm", 
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
-          console.log("Settings clicked")
-          onClose()
+          onClose();;
+          navigate('/tabs/settings');
         }}
       >
         Settings
@@ -69,8 +72,8 @@ function TabMenu({ menuPos, isOpen, onClose }) {
         className={clsx("block w-full text-left px-4 py-2 text-sm", 
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
-          console.log("Help clicked")
-          onClose()
+          onClose();
+          navigate('/tabs/help');
         }}
       >
         Help

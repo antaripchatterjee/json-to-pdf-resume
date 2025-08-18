@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router';
 import { PlusIcon } from '@heroicons/react/24/outline';
 
 import TabButton from './TabButton';
@@ -7,6 +8,7 @@ import TabMenu from './TabMenu';
 import useTabStore from '../stores/tab.store';
 
 function TabButtons() {
+  const navigate = useNavigate();
   const { tabs, addTab } = useTabStore();
 
   const [menuOpen, setMenuOpen] = useState(false)
@@ -28,6 +30,7 @@ function TabButtons() {
           key={`tab-key-${key}`}
           label={value}
           tabIndex={key}
+          onClick={() => navigate(`/tabs/${key}`)}
         />)
       }
 

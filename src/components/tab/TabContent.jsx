@@ -1,8 +1,10 @@
 import React from 'react'
 
-function TabContent() {
+function TabContent({ children }) {
   return (
-    <div>TabContent</div>
+    <div>
+      {children}
+    </div>
   )
 }
 

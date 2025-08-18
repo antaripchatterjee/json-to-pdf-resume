@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react'
 import clsx from 'clsx'
 import useTabStore from '../stores/tab.store'
 
-function TabButton({ tabIndex, label }) {
-  const { removeTab, updateTab } = useTabStore();
+function TabButton({ tabIndex, label, onClick }) {
+  const { removeTab, updateTab, setActiveTab, activeTabIndex } = useTabStore();
 
   const [editable, setEditable] = useState(false);
   const [tempLabel, setTempLabel] = useState(label);
@@ -51,7 +51,10 @@ function TabButton({ tabIndex, label }) {
 
   return (
     <button
-      onClick={() => console.log(label)}
+      onClick={(e) => {
+        onClick();
+        setActiveTab(tabIndex);
+      }}
       onDoubleClick={() => {
         setEditable(true);
         setTimeout(() => {
@@ -67,15 +70,16 @@ function TabButton({ tabIndex, label }) {
       title={label}
       className={clsx(
         "flex-shrink-0 flex justify-start px-4 py-2 w-40",
-        "rounded font-medium text-sm relative bg-theme-light-primary",
-        "dark:bg-theme-dark-primary hover:bg-gray-600 text-whitesmoke",
-        "shadow-lg tab-btn"
+        "rounded font-medium text-sm relative text-whitesmoke hover:bg-gray-600",
+        "shadow-lg tab-btn",
+        activeTabIndex === tabIndex ?
+          "dark:bg-theme-light-primary bg-theme-dark-primary" :
+          "bg-theme-light-primary dark:bg-theme-dark-primary"
       )}
     >
       <span
         onClick={(e) => {
           e.stopPropagation();
-          console.log(tabIndex)
           removeTab(tabIndex);
         }}
         className="font-bold absolute right-4 top-0.5 hidden hover:scale-150"
