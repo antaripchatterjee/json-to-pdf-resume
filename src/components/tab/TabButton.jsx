@@ -82,7 +82,11 @@ function TabButton({ tabIndex, label, onClick }) {
           e.stopPropagation();
           removeTab(tabIndex);
         }}
-        className="font-bold absolute right-4 top-0.5 hidden hover:scale-150"
+        className={
+          clsx("font-bold absolute right-4 top-0.5 hover:scale-150",
+            activeTabIndex === tabIndex ? "" : "hidden"
+          )
+        }
       >
         &times;
       </span>

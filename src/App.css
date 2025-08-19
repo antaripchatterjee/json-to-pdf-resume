@@ -1,7 +1,7 @@
-#json-editor {
+/* #json-editor {
     width: 100% !important;
     height: 100% !important;
-}
+} */
 
 @media (max-width: 1023px) {
     #json-editor {

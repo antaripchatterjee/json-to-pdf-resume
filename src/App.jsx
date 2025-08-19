@@ -2,18 +2,18 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Font } from '@react-pdf/renderer';
 
 
-import { handleFileUpload } from './utils/handleFileUpload';
-import { downloadJSON } from './utils/downloadJSON';
+// import { handleFileUpload } from './utils/handleFileUpload';
+// import { downloadJSON } from './utils/downloadJSON';
 
-import SearchableSelect from './components/SearchableSelect';
-import JSONEditor from './components/JSONEditor';
-import CustomFontModal from './components/CustomFontModal';
-import PDFContainer from './components/PDFContainer';
+// import SearchableSelect from './components/SearchableSelect';
+// import JSONEditor from './components/JSONEditor';
+// import CustomFontModal from './components/CustomFontModal';
+// import PDFContainer from './components/PDFContainer';
 
 import './App.css';
-import ToggleButton from './components/ToggleButton';
-import IconButton from './components/IconButton';
-import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+// import ToggleButton from './components/ToggleButton';
+// import IconButton from './components/IconButton';
+// import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import Branding from './components/navber/Branding';
 import TabContainer from './components/tab/TabContainer';
 

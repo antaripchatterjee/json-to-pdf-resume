@@ -4,6 +4,8 @@ import TabButtons from './TabButtons';
 import TabContent from './TabContent';
 import useTabStore from '../stores/tab.store';
 
+import Workspace from '../workspace/Workspace';
+
 function TabContainer() {
   const { tabs } = useTabStore()
   return (
@@ -53,12 +55,10 @@ function TabContainer() {
             {[...tabs].map(([key, value]) =>
               <Route
                 path={`/tabs/${key}`}
-                key={`tab-content-${key}`}
+                key={`tab-route-${key}`}
                 element={(
-                  <TabContent>
-                    <div className='text-gray-900 font-bold'>
-                      Tab: {value}
-                    </div>
+                  <TabContent title={value}>
+                    <Workspace tabIndex={key} />
                   </TabContent>
                 )}
               />
