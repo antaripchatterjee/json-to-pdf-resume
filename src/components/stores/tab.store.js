@@ -4,15 +4,18 @@ import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
 const useTabStore = create((set) => ({
   tabs: new Map(),
   activeTabIndex: null,
-  addTab: () => set((state) => {
+  addTab: () => {
     const tabIndex = AutoIncrementalTabIndex.getNext();
-    const newTabs = new Map(state.tabs);
-    newTabs.set(tabIndex, `New Tab ${tabIndex}`);
-    return {
-      tabs: newTabs,
-      activeTabIndex: tabIndex
-    };
-  }),
+    set((state) => {
+      const newTabs = new Map(state.tabs);
+      newTabs.set(tabIndex, `New Tab ${tabIndex}`);
+      return {
+        tabs: newTabs,
+        activeTabIndex: tabIndex
+      };
+    });
+    return tabIndex;
+  },
   removeTab: (tabIndex) => set((state) => {
     let deleteOkay = true;
     const newTabs = new Map(state.tabs);
@@ -23,7 +26,7 @@ const useTabStore = create((set) => ({
         const idx = keys.indexOf(tabIndex);
         if (idx > 0) {
           newActive = keys[idx - 1];
-        } else if(idx === 0) {
+        } else if (idx === 0) {
           newActive = keys[1] ?? null;
         } else {
           deleteOkay = false;
@@ -32,7 +35,7 @@ const useTabStore = create((set) => ({
         newActive = null;
       }
     }
-    if(deleteOkay) {
+    if (deleteOkay) {
       newTabs.delete(tabIndex);
     }
     return {

@@ -1,8 +1,9 @@
 import { create } from "zustand";
-import AceEditorContent from "./utils/aceEditorContent";
+// import AceEditorContent from "./utils/aceEditorContent";
+import * as monaco from 'monaco-editor';
 
-export const useJSONEditorStore = create(set => ({
-  theme: 'github',
+export const useEditorStore = create(set => ({
+  theme: 'vs-dark',
   fontSize: 16,
   indentSize: 2,
   setTheme: (theme) => set(() => ({
@@ -28,34 +29,57 @@ export const usePDFContainerStore = create(set => ({
   }))
 }));
 
+
 export const useWorkspaceStore = create((set, get) => ({
-  jsonContents: new Map(),
+  // Map: path (string) -> { model, viewState }
+  editors: new Map(),
 
-  setJSONContent: (tabIndex, content) =>
-    set((state) => {
-      const newMap = new Map(state.jsonContents);
-      const existing = newMap.get(tabIndex) || new AceEditorContent();
-      existing.content = content;
-      newMap.set(tabIndex, existing);
-      return { jsonContents: newMap };
-    }),
+  // Create or return existing model
+  createOrGetModel: (path, language, initialValue, monaco) => {
+    const uri = monaco.Uri.parse(`file:///${path}`);
+    let model = monaco.editor.getModel(uri);
 
-  setEditorState: (tabIndex, editor) =>
-    set((state) => {
-      const newMap = new Map(state.jsonContents);
-      const existing = newMap.get(tabIndex) || new AceEditorContent();
+    if (!model) {
+      model = monaco.editor.createModel(initialValue, language, uri);
+    }
 
-      existing.cursor = editor.getCursorPosition();
-      existing.firstVisibleRow = editor.getFirstVisibleRow();
-      existing.lastVisibleRow = editor.getLastVisibleRow();
-      existing.selectionRange = editor.getSelectionRange();
-
-      newMap.set(tabIndex, existing);
-      return { jsonContents: newMap };
-    }),
-
-  getJSONContent: (tabIndex) => {
-    const map = get().jsonContents;
-    return map.get(tabIndex) || new AceEditorContent();
+    return model;
   },
+
+  // Save editor view state (cursor, scroll, selections)
+  saveViewState: (path, editorInstance) => {
+    const editors = new Map(get().editors);
+    if (!editors.has(path)) return;
+
+    const viewState = editorInstance.saveViewState();
+    editors.set(path, { ...editors.get(path), viewState });
+    set({ editors });
+  },
+
+  // Restore editor view state
+  restoreViewState: (path, editorInstance) => {
+    const editors = get().editors;
+    if (!editors.has(path)) return;
+
+    const { viewState } = editors.get(path);
+    if (viewState) {
+      editorInstance.restoreViewState(viewState);
+    }
+    editorInstance.focus();
+  },
+
+  // Get content of a file
+  getValue: (path) => {
+    const editors = get().editors;
+    return editors.has(path) ? editors.get(path).model.getValue() : "";
+  },
+
+  // Update content programmatically
+  setValue: (path, newValue) => {
+    const editors = new Map(get().editors);
+    if (editors.has(path)) {
+      editors.get(path).model.setValue(newValue);
+      set({ editors });
+    }
+  }
 }));

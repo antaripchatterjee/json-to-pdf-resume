@@ -2,9 +2,13 @@ import React, { useEffect } from "react";
 import clsx from "clsx";
 import { useNavigate } from "react-router";
 
+import useTabStore from "../stores/tab.store";
+
 
 function TabMenu({ menuPos, isOpen, onClose }) {
   const navigate = useNavigate();
+
+  const addTab = useTabStore(state => state.addTab);
 
   useEffect(() => {
     const handleClick = () => onClose();
@@ -49,7 +53,8 @@ function TabMenu({ menuPos, isOpen, onClose }) {
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
           onClose();
-          // navigate('/tabs/home');
+          const newTabIndex = addTab();
+          navigate(`/tabs/${newTabIndex}`);
         }}
       >
         New Resume

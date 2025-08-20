@@ -1,14 +1,12 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-
-import JSONEditor from './JSONEditor'
+import React from 'react';
+import EditorPane from './EditorPane'
 import PDFContainer from './PDFContainer'
 
 function Workspace({ tabIndex }) {
   return (
     <div className="flex h-[95%] gap-6 border-1">
-      <JSONEditor
-        tabIndex={tabIndex}
+      <EditorPane
+        path={`workspace/tabs/${tabIndex}`}
       />
       {/* <PDFContainer
         renderPDF={renderPDF}
@@ -16,10 +14,6 @@ function Workspace({ tabIndex }) {
       /> */}
     </div>
   )
-}
-
-Workspace.propTypes = {
-  // title: PropTypes.string.isRequired()
 }
 
 export default Workspace;

@@ -37,7 +37,10 @@ function TabButtons() {
       <div ref={buttonRef}>
         <button
           onContextMenu={toggleMenu}
-          onClick={() => addTab()}
+          onClick={() => {
+            const newTabIndex = addTab();
+            navigate(`/tabs/${newTabIndex}`)
+          }}
           className="px-2 py-2 rounded-full ml-1 bg-theme-light-primary dark:bg-theme-dark-primary hover:bg-gray-600 text-whitesmoke shadow-lg"
         >
           <PlusIcon className="h-[22px] w-[22px]" />
