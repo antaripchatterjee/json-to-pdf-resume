@@ -11,7 +11,8 @@ function TabContainer() {
   return (
     <BrowserRouter>
       <div className="mx-auto h-full relative">
-        <div className="p-4 h-full">
+        <TabButtons />
+        <div className="h-full">
           <Routes>
             <Route
               path="/"
@@ -58,7 +59,10 @@ function TabContainer() {
                 key={`tab-route-${key}`}
                 element={(
                   <TabContent title={value}>
-                    <Workspace tabIndex={key} />
+                    <Workspace 
+                      tabIndex={key} 
+                      title={value} 
+                    />
                   </TabContent>
                 )}
               />
@@ -71,7 +75,6 @@ function TabContainer() {
             />
           </Routes>
         </div>
-        <TabButtons />
       </div>
     </BrowserRouter>
   )

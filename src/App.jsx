@@ -180,7 +180,7 @@ function App() {
     <div className="max-w-screen min-w-screen min-h-screen max-h-screen bg-white dark:bg-gray-800 text-black dark:text-whitesmoke">
       <div className="w-screen h-screen mx-auto px-4 py-2">
         <Branding />
-        <div className='w-full h-[86%] bg-white border border-gray-300'>
+        <div className='w-full h-[80%]'>
           <TabContainer />
         </div>
       </div>

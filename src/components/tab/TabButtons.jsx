@@ -24,7 +24,7 @@ function TabButtons() {
   }
 
   return (
-    <div className="flex items-start border-gray-300 absolute -bottom-8 -left-0.5 w-full overflow-x-auto scrollbar-thin">
+    <div className="flex items-start border-gray-300 w-full overflow-x-scroll scrollbar-hidden">
       {[...tabs].map(([key, value]) =>
         <TabButton
           key={`tab-key-${key}`}
@@ -41,9 +41,9 @@ function TabButtons() {
             const newTabIndex = addTab();
             navigate(`/tabs/${newTabIndex}`)
           }}
-          className="px-2 py-2 rounded-full ml-1 bg-theme-light-primary dark:bg-theme-dark-primary hover:bg-gray-600 text-whitesmoke shadow-lg"
+          className="px-2 py-2 bg-theme-light-primary dark:bg-theme-dark-primary hover:bg-gray-600 text-whitesmoke shadow-lg"
         >
-          <PlusIcon className="h-[22px] w-[22px]" />
+          <PlusIcon className="h-[20.8px] w-[20.8px]" />
         </button>
       </div>
 

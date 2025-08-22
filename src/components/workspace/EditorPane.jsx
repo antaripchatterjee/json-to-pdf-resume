@@ -24,7 +24,7 @@ export default function EditorPane({ path }) {
 
   return (
     <Editor
-      height="95%"
+      height="100%"
       theme="vs-dark"
       defaultLanguage="json"
       path={path}

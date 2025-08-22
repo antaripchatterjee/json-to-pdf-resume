@@ -34,7 +34,7 @@ function TabMenu({ menuPos, isOpen, onClose }) {
         "bg-white border-gray-200 text-gray-800",
         "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100")}
       style={{ 
-        top: `${menuPos.y - 160}px`, 
+        top: `${menuPos.y + 40}px`, 
         left: `${Math.max(20, menuPos.x - 176)}px` 
       }}
     >

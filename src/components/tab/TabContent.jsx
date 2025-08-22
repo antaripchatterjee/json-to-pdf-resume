@@ -1,11 +1,8 @@
 import React from 'react'
 
-function TabContent({ children, title }) {
+function TabContent({ children }) {
   return (
-    <div className='h-full'>
-      <div className='flex p-0.5 justify-center text-center'>
-        <span className='text-zinc-500 dark:text-whitesmoke tab-title'>{title}</span>
-      </div>
+    <div className='h-[98%]'>
       {children}
     </div>
   )
