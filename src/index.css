@@ -2,7 +2,7 @@
 
 
 @theme {
-  --color-whitesmoke: whitesmoke;
+  --color-customwhite: #f7fbfc;
   --color-theme-light-primary: #102fdd;
   --color-theme-dark-primary: #11bcfa;
 }

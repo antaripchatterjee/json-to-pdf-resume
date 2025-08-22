@@ -10,7 +10,7 @@ const styles = (fontFamily) => StyleSheet.create({
     fontFamily,
   },
   primaryInfo: {
-    backgroundColor: 'whitesmoke',
+    backgroundColor: 'customwhite',
     padding: 16,
     margin: 0,
     flexDirection: 'row',

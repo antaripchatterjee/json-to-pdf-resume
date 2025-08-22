@@ -117,7 +117,7 @@ export default function SearchableSelect({
             onFocus={handleOptionSelection}
             onKeyDown={handleOptionSelection}
             onChange={handleSelect}
-            className="absolute left-0 top-full w-full border border-gray-300 rounded bg-white dark:bg-black dark:text-whitesmoke capitalize z-10"
+            className="absolute left-0 top-full w-full border border-gray-300 rounded bg-white dark:bg-black dark:text-customwhite capitalize z-10"
           >
             {filteredOptions.map((opt, idx) => (
               <option
@@ -140,7 +140,7 @@ export default function SearchableSelect({
         <input
           ref={inputRef}
           type="text"
-          className="mt-1 w-full border border-gray-300 rounded px-2 py-1 capitalize bg-white text-black dark:bg-black dark:text-whitesmoke relative z-20 font-medium"
+          className="mt-1 w-full border border-gray-300 rounded px-2 py-1 capitalize bg-white text-black dark:bg-black dark:text-customwhite relative z-20 font-medium"
           placeholder={currentSuggestion ? null : placeholder}
           value={query}
           enterKeyHint="next"

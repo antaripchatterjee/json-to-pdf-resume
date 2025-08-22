@@ -70,11 +70,11 @@ function TabButton({ tabIndex, label, onClick }) {
       title={label}
       className={clsx(
         "flex-shrink-0 flex justify-start px-4 py-2 w-40",
-        "font-medium text-sm relative text-whitesmoke hover:bg-gray-600",
+        "font-medium text-sm relative text-gray-800 dark:text-gray-50 hover:font-bold",
         "shadow-lg tab-btn",
         activeTabIndex === tabIndex ?
-          "dark:bg-theme-light-primary bg-theme-dark-primary" :
-          "bg-theme-light-primary dark:bg-theme-dark-primary"
+          "bg-zinc-300 dark:bg-slate-700" :
+          "bg-zinc-200 dark:bg-slate-800"
       )}
     >
       <span
@@ -99,7 +99,7 @@ function TabButton({ tabIndex, label, onClick }) {
         onKeyDown={handleKeyDown}
         className={clsx(
           "inline-block text-[12px] max-w-3/4 outline-none p-0.5",
-          editable ? "overflow-x-scroll scrollbar-hidden bg-white text-blue-950" : "truncate"
+          editable ? "overflow-x-scroll scrollbar-hidden bg-white text-gray-800" : "truncate"
         )}
       >
         {tempLabel}

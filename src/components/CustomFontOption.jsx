@@ -16,8 +16,8 @@ export default function CustomFontOption({ optionId, row }) {
   return (<>
     <div className="absolute -mt-2">
       <button className={`text-[size:10px] px-2 py-1 rounded shadow transition ${added
-        ? "text-theme-light-primary dark:text-theme-dark-primary" : "text-whitesmoke"
-        } ${added ? "bg-whitesmoke" : "bg-theme-light-primary dark:bg-theme-dark-primary"} hover:text-white hover:bg-blue-900`}
+        ? "text-theme-light-primary dark:text-theme-dark-primary" : "text-customwhite"
+        } ${added ? "bg-customwhite" : "bg-theme-light-primary dark:bg-theme-dark-primary"} hover:text-white hover:bg-blue-900`}
         onClick={() => setAdded(!added)}
       >
         {added ? '- Remove' : '+ Add'}
