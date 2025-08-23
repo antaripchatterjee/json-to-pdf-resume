@@ -39,10 +39,12 @@ function TabButton({ tabIndex, label, onClick }) {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      e.target.scrollLeft = 0;
       setEditable(false);
       handleCommit();
     } else if (e.key === "Escape") {
       e.preventDefault();
+      e.target.scrollLeft = 0;
       setEditable(false);
       spanRef.current.innerText = label; // restore DOM directly
       setTempLabel(label);
@@ -70,26 +72,13 @@ function TabButton({ tabIndex, label, onClick }) {
       title={label}
       className={clsx(
         "flex-shrink-0 flex justify-start px-4 py-2 w-40",
-        "font-medium text-sm relative text-gray-800 dark:text-gray-50 hover:font-bold",
+        "font-medium text-sm text-gray-800 dark:text-gray-50 hover:font-bold",
         "shadow-lg tab-btn",
         activeTabIndex === tabIndex ?
           "bg-zinc-300 dark:bg-slate-700" :
           "bg-zinc-200 dark:bg-slate-800"
       )}
     >
-      <span
-        onClick={(e) => {
-          e.stopPropagation();
-          removeTab(tabIndex);
-        }}
-        className={
-          clsx("font-bold absolute right-4 top-0.5 hover:scale-150",
-            activeTabIndex === tabIndex ? "" : "hidden"
-          )
-        }
-      >
-        &times;
-      </span>
 
       {/* Editable Label */}
       <span
@@ -98,11 +87,27 @@ function TabButton({ tabIndex, label, onClick }) {
         suppressContentEditableWarning={true}
         onKeyDown={handleKeyDown}
         className={clsx(
-          "inline-block text-[12px] max-w-3/4 outline-none p-0.5",
-          editable ? "overflow-x-scroll scrollbar-hidden bg-white text-gray-800" : "truncate"
+          "inline-block text-[12px] w-10/12 outline-none p-0.5 text-start",
+          editable ? 
+            "overflow-x-scroll overflow-y-hidden whitespace-nowrap scrollbar-hidden bg-white text-gray-800" 
+            : "truncate"
         )}
       >
         {tempLabel}
+      </span>
+
+      <span
+        onClick={(e) => {
+          e.stopPropagation();
+          removeTab(tabIndex);
+        }}
+        className={
+          clsx("flex-1 justify-self-end font-bold hover:scale-150",
+            activeTabIndex === tabIndex ? "" : "hidden"
+          )
+        }
+      >
+        &times;
       </span>
     </button>
   )

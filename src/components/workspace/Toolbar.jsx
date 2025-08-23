@@ -4,21 +4,20 @@ import {
   ExclamationTriangleIcon,
   CommandLineIcon,
   PencilSquareIcon,
-  CodeBracketIcon,
-  ArrowsRightLeftIcon,
+  // CodeBracketIcon,
   ArrowDownTrayIcon
 } from "@heroicons/react/24/solid";
 
-import clsx from "clsx";
+import { LanguageIcon } from "../icons/LanguageIcon";
 
 function Toolbar({
   title,
   errors = [],
   warnings = [],
-  line = 1,
-  column = 1,
+  line = 0,
+  column = 0,
   selectionCount = 0,
-  indentation = 2,
+  indentation = 4,
   setIndentation,
   encoding = "UTF-8",
   lineEnding = "LF",
@@ -29,14 +28,17 @@ function Toolbar({
   toggleOverwrite,
 }) {
   return (
-    <div className="flex items-center justify-between min-w-full w-fit min-h-7 h-fit px-3 bg-zinc-300 dark:bg-gray-800 text-xs text-gray-800 dark:text-gray-50">
+    <div className="flex items-center justify-between min-w-full w-fit min-h-7 h-fit px-3 select-none bg-zinc-300 dark:bg-gray-800 text-xs text-gray-800 dark:text-gray-50">
       {/* Left side */}
       <div className="flex items-center gap-3 flex-wrap">
         <button className="flex items-center gap-1"
           onClick={() => alert(`TODO: download ${title}`)}
         >
-          <ArrowDownTrayIcon className="h-4 w-4 hover:text-blue-700" />
-          <span className="inline-block max-w-25 truncate">
+          <ArrowDownTrayIcon 
+            title={`${title}`}
+            className="h-4 w-4 hover:text-blue-700" 
+          />
+          <span className="inline-block max-w-25 truncate max-[835px]:hidden">
             {title}
           </span>
         </button>
@@ -60,37 +62,40 @@ function Toolbar({
       </div>
 
       {/* Middle */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 max-[736px]:hidden">
         <span>Ln {line}, Col {column}</span>
-        {selectionCount > 0 && <span>Sel {selectionCount}</span>}
+        {selectionCount > 0 && <span>(Sel {selectionCount})</span>}
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-4">
 
-        <div className="flex flex-wrap gap-4">
-          <span>{encoding}</span>
-          <span>{lineEnding}</span>
+        <div className="flex flex-wrap gap-2">
+          <span className="max-[524px]:hidden">{lineEnding}</span>
+          <span className="max-[480px]:hidden">{encoding}</span>
         </div>
         {/* Indentation */}
-        <div className="flex gap-1">
-          <ArrowsRightLeftIcon className="h-4 w-4" />
-          <select
-            className="bg-transparent border-none outline-none"
-            value={indentation}
-            onChange={(e) => setIndentation?.(Number(e.target.value))}
-          >
-            <option value={2}>2 Spaces</option>
-            <option value={4}>4 Spaces</option>
-            <option value={8}>8 Spaces</option>
-          </select>
-        </div>
+        <select
+          className="bg-transparent border-none outline-none max-[410px]:hidden"
+          value={indentation}
+          onChange={(e) => setIndentation?.(Number(e.target.value))}
+        >
+          <option value={2}>2 Spaces</option>
+          <option value={4}>4 Spaces</option>
+          <option value={8}>8 Spaces</option>
+        </select>
 
         {/* Language */}
-        <div className="flex gap-1">
-          <CodeBracketIcon className="h-4 w-4" />
+        <div className="flex items-center gap-0.5">
+          <LanguageIcon
+            type={language}
+            className="max-[430px]:!hidden" 
+            size={12} 
+            italic={false} 
+            weight={600} 
+          />
           <select
-            className="bg-transparent border-none outline-none"
+            className="bg-transparent border-none outline-none max-[322px]:hidden"
             value={language}
             onChange={(e) => setLanguage?.(e.target.value)}
           >
@@ -100,27 +105,25 @@ function Toolbar({
           </select>
         </div>
 
-        {/* Command palette */}
-        <button
-          className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded"
-          onClick={onOpenCommandPalette}
-        >
-          <CommandLineIcon className="w-4 h-4" />
-        </button>
-
         {/* Insert/Overwrite toggle */}
         <button
-          className={clsx(
-            "flex items-center gap-1",
-            overwrite
-              ? "bg-blue-600 text-white"
-              : "hover:bg-zinc-200 dark:hover:bg-zinc-700"
-          )}
+          className="flex items-center gap-1 max-[251px]:hidden"
           onClick={toggleOverwrite}
         >
-          <PencilSquareIcon className="w-4 h-4" />
+          <PencilSquareIcon className="w-4 h-4 max-[270px]:hidden hover:text-blue-700" />
           {overwrite ? "OVR" : "INS"}
         </button>
+
+        {/* Command palette */}
+        <button
+          className="p-1 rounded"
+          onClick={onOpenCommandPalette}
+        >
+          <CommandLineIcon 
+            className="w-4 h-4 hover:text-blue-700"
+          />
+        </button>
+
       </div>
     </div>
   );
