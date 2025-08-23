@@ -4,6 +4,7 @@ import TabButtons from './TabButtons';
 import TabContent from './TabContent';
 import useTabStore from '../stores/tab.store';
 
+import PageNoFound from '../errors/PageNoFound';
 import Workspace from '../workspace/Workspace';
 
 function TabContainer() {
@@ -69,9 +70,7 @@ function TabContainer() {
             )}
             <Route
               path='*'
-              element={
-                <h1>Could not find what you are looking for!</h1>
-              }
+              element={<PageNoFound />}
             />
           </Routes>
         </div>

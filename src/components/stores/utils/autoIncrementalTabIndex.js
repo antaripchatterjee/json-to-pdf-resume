@@ -21,6 +21,11 @@ export default class AutoIncrementalTabIndex {
     return ++instance.#counter;
   }
 
+  static getCurrent() {
+    const instance = AutoIncrementalTabIndex.getInstance();
+    return instance.#counter;
+  }
+
   static reset(start = 0) {
     const instance = AutoIncrementalTabIndex.getInstance();
     instance.#counter = start;

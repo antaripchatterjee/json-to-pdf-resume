@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react'
-import clsx from 'clsx'
-import useTabStore from '../stores/tab.store'
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import clsx from 'clsx';
+import useTabStore from '../stores/tab.store';
 
 function TabButton({ tabIndex, label, onClick }) {
+  const navigate = useNavigate();
   const { removeTab, updateTab, setActiveTab, activeTabIndex } = useTabStore();
 
   const [editable, setEditable] = useState(false);
@@ -55,6 +57,7 @@ function TabButton({ tabIndex, label, onClick }) {
     <button
       onClick={(e) => {
         onClick();
+        console.log(`Tab Button Click ${tabIndex}`)
         setActiveTab(tabIndex);
       }}
       onDoubleClick={() => {
@@ -79,8 +82,6 @@ function TabButton({ tabIndex, label, onClick }) {
           "bg-zinc-200 dark:bg-slate-800"
       )}
     >
-
-      {/* Editable Label */}
       <span
         ref={spanRef}
         contentEditable={editable}
@@ -99,7 +100,10 @@ function TabButton({ tabIndex, label, onClick }) {
       <span
         onClick={(e) => {
           e.stopPropagation();
-          removeTab(tabIndex);
+          const navigateToPrev = removeTab(tabIndex);
+          if(navigateToPrev) {
+            navigate(-1);
+          }
         }}
         className={
           clsx("flex-1 justify-self-end font-bold hover:scale-150",

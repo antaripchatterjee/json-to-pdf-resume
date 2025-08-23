@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import useTabStore from "../stores/tab.store";
 
 
-function TabMenu({ menuPos, isOpen, onClose }) {
+function TabMenu({ menuPos, isOpen, onClose, afterTabAdded }) {
   const navigate = useNavigate();
 
   const addTab = useTabStore(state => state.addTab);
@@ -55,6 +55,7 @@ function TabMenu({ menuPos, isOpen, onClose }) {
           onClose();
           const newTabIndex = addTab();
           navigate(`/tabs/${newTabIndex}`);
+          afterTabAdded();
         }}
       >
         New Resume
