@@ -9,7 +9,7 @@ import useTabStore from '../stores/tab.store';
 
 function TabButtons() {
   const navigate = useNavigate();
-  const { tabs, addTab } = useTabStore();
+  const { tabs, addTab, getActiveTab } = useTabStore();
   const [ tabAdded, setTabAdded] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false)
@@ -52,7 +52,8 @@ function TabButtons() {
           <button
             onContextMenu={toggleMenu}
             onClick={() => {
-              const newTabIndex = addTab();
+              addTab();
+              const newTabIndex = getActiveTab()
               navigate(`/tabs/${newTabIndex}`);
               setTabAdded(true);
             }}

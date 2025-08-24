@@ -5,8 +5,9 @@ import useTabStore from '../stores/tab.store';
 
 function TabButton({ tabIndex, label, onClick }) {
   const navigate = useNavigate();
-  const { removeTab, updateTab, setActiveTab, activeTabIndex } = useTabStore();
+  const { removeTab, updateTab, setActiveTab, getActiveTab } = useTabStore();
 
+  const activeTabIndex = getActiveTab();
   const [editable, setEditable] = useState(false);
   const [tempLabel, setTempLabel] = useState(label);
   const spanRef = useRef(null);
@@ -57,7 +58,6 @@ function TabButton({ tabIndex, label, onClick }) {
     <button
       onClick={(e) => {
         onClick();
-        console.log(`Tab Button Click ${tabIndex}`)
         setActiveTab(tabIndex);
       }}
       onDoubleClick={() => {
@@ -100,9 +100,15 @@ function TabButton({ tabIndex, label, onClick }) {
       <span
         onClick={(e) => {
           e.stopPropagation();
-          const navigateToPrev = removeTab(tabIndex);
-          if(navigateToPrev) {
-            navigate(-1);
+          const {navigateTo, shouldNavigate} = removeTab(tabIndex);
+          console.log(`After deleting tab ${tabIndex} you should${!shouldNavigate && ' not' || ''} navigate to index ${navigateTo}.`)
+          if(shouldNavigate) {
+            if(navigateTo) {
+              // navigate(-1);
+              navigate(`/tabs/${navigateTo}`)
+            } else {
+              navigate('/tabs/home')
+            }
           }
         }}
         className={
