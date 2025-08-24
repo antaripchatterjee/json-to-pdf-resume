@@ -10,7 +10,18 @@ function TabButton({ tabIndex, label, onClick }) {
   const activeTabIndex = getActiveTab();
   const [editable, setEditable] = useState(false);
   const [tempLabel, setTempLabel] = useState(label);
+  const buttonRef = useRef(null);
   const spanRef = useRef(null);
+
+  useEffect(() => {
+    if(buttonRef.current && activeTabIndex === tabIndex) {
+      buttonRef.current.scrollIntoView({
+        inline: 'nearest',
+        block: 'nearest',
+        behavior: 'smooth'
+      })
+    }
+  }, [activeTabIndex])
 
   // Handle outside clicks
   useEffect(() => {
@@ -56,9 +67,12 @@ function TabButton({ tabIndex, label, onClick }) {
 
   return (
     <button
+      ref={buttonRef}
       onClick={(e) => {
-        onClick();
-        setActiveTab(tabIndex);
+        if(tabIndex !== activeTabIndex) {
+          onClick();
+          setActiveTab(tabIndex);
+        }
       }}
       onDoubleClick={() => {
         setEditable(true);
@@ -101,13 +115,11 @@ function TabButton({ tabIndex, label, onClick }) {
         onClick={(e) => {
           e.stopPropagation();
           const {navigateTo, shouldNavigate} = removeTab(tabIndex);
-          console.log(`After deleting tab ${tabIndex} you should${!shouldNavigate && ' not' || ''} navigate to index ${navigateTo}.`)
           if(shouldNavigate) {
             if(navigateTo) {
-              // navigate(-1);
-              navigate(`/tabs/${navigateTo}`)
+              navigate(`/tabs/${navigateTo}`, { replace: true })
             } else {
-              navigate('/tabs/home')
+              navigate('/tabs/home', { replace: true })
             }
           }
         }}

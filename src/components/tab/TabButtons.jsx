@@ -43,7 +43,7 @@ function TabButtons() {
             key={`tab-key-${key}`}
             label={value}
             tabIndex={key}
-            onClick={() => navigate(`/tabs/${key}`)}
+            onClick={() => navigate(`/tabs/${key}`, { replace: true })}
           />
         )}
       </div>
@@ -54,7 +54,7 @@ function TabButtons() {
             onClick={() => {
               addTab();
               const newTabIndex = getActiveTab()
-              navigate(`/tabs/${newTabIndex}`);
+              navigate(`/tabs/${newTabIndex}`, { replace: true });
               setTabAdded(true);
             }}
             className="px-2 py-2 dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700"

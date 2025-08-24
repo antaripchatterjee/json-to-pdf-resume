@@ -1,0 +1,44 @@
+import { createBrowserHistory } from "history";
+
+class UniqueBrowserHistory {
+  history = null;
+  visited = null;
+  constructor() {
+    this.history = createBrowserHistory();
+    this.visited = new Set();
+  }
+
+  push(path, state) {
+    if (this.visited.has(path)) {
+      this.history.replace(path, state);
+    } else {
+      this.visited.add(path);
+      this.history.push(path, state);
+    }
+  }
+
+  replace(path, state) {
+    this.visited.add(path);
+    this.history.replace(path, state);
+  }
+
+  go(n) {
+    this.history.go(n);
+  }
+
+  listen(listener) {
+    return this.history.listen(listener);
+  }
+
+  get location() {
+    return this.history.location;
+  }
+
+  get action() {
+    return this.history.action;
+  }
+}
+
+export default function uniqueBrowserHistory() {
+    return new UniqueBrowserHistory();
+}

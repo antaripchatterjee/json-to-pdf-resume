@@ -1,4 +1,11 @@
 import React from 'react'
+// import {
+//   // HistoryRouter as StableHistoryRouter,
+//   unstable_HistoryRouter as ExperimentalHistoryRouter
+// } from "react-router";
+
+// const UniqueHistoryRouter = ExperimentalHistoryRouter;
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import TabButtons from './TabButtons';
 import TabContent from './TabContent';
@@ -7,10 +14,14 @@ import useTabStore from '../stores/tab.store';
 import PageNoFound from '../errors/PageNoFound';
 import Workspace from '../workspace/Workspace';
 
+// import uniqueBrowserHistory from '../../utils/uniqueBrowserHistory';
+
+
 function TabContainer() {
-  const { tabs } = useTabStore()
+  const { tabs } = useTabStore();
+  // const history = uniqueBrowserHistory();
   return (
-    <BrowserRouter>
+    <BrowserRouter /*history={history}*/>
       <div className="mx-auto h-full relative">
         <TabButtons />
         <div className="h-full">

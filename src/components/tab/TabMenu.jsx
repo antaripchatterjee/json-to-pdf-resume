@@ -44,7 +44,7 @@ function TabMenu({ menuPos, isOpen, onClose, afterTabAdded }) {
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
           onClose();
-          navigate('/tabs/home');
+          navigate('/tabs/home', { replace: true });
         }}
       >
         Home
@@ -56,7 +56,7 @@ function TabMenu({ menuPos, isOpen, onClose, afterTabAdded }) {
           onClose();
           addTab();
           const newTabIndex = getActiveTab();
-          navigate(`/tabs/${newTabIndex}`);
+          navigate(`/tabs/${newTabIndex}`, { replace: true });
           afterTabAdded();
         }}
       >
@@ -70,7 +70,7 @@ function TabMenu({ menuPos, isOpen, onClose, afterTabAdded }) {
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
           onClose();
-          navigate('/tabs/settings');
+          navigate('/tabs/settings', { replace: true });
         }}
       >
         Settings
@@ -81,7 +81,7 @@ function TabMenu({ menuPos, isOpen, onClose, afterTabAdded }) {
           "hover:bg-gray-100 dark:hover:bg-gray-700")}
         onClick={() => {
           onClose();
-          navigate('/tabs/help');
+          navigate('/tabs/help', { replace: true });
         }}
       >
         Help
