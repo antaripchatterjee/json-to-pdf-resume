@@ -9,16 +9,19 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import TabButtons from './TabButtons';
 import TabContent from './TabContent';
-import useTabStore from '../stores/tab.store';
+// import useTabStore from '../stores/tab.store';
 
 import PageNoFound from '../errors/PageNoFound';
 import Workspace from '../workspace/Workspace';
+import Home from '../workspace/Home';
+import Settings from '../workspace/Settings';
+import Help from '../workspace/Help';
 
 // import uniqueBrowserHistory from '../../utils/uniqueBrowserHistory';
 
 
 function TabContainer() {
-  const { tabs } = useTabStore();
+  // const { tabs } = useTabStore();
   // const history = uniqueBrowserHistory();
   return (
     <BrowserRouter /*history={history}*/>
@@ -30,55 +33,43 @@ function TabContainer() {
               path="/"
               element={
                 <Navigate 
-                  to="/tabs/home" 
+                  to="/home" 
                   replace 
                 />
               }
             />
             <Route
-              path="/tabs/home"
+              path="/home"
               element={(
                 <TabContent>
-                  <div className='text-gray-900 font-bold'>
-                    Home Tab
-                  </div>
+                  <Home />
                 </TabContent>
               )}
             />
             <Route
-              path="/tabs/settings"
+              path="/settings"
               element={(
                 <TabContent>
-                  <div className='text-gray-900 font-bold'>
-                    Settings Tab
-                  </div>
+                  <Settings />
                 </TabContent>
               )}
             />
             <Route
-              path="/tabs/help"
+              path="/help"
               element={(
                 <TabContent>
-                  <div className='text-gray-900 font-bold'>
-                    Help Tab
-                  </div>
+                  <Help />
                 </TabContent>
               )}
             />
-            {[...tabs].map(([key, value]) =>
-              <Route
-                path={`/tabs/${key}`}
-                key={`tab-route-${key}`}
-                element={(
-                  <TabContent title={value}>
-                    <Workspace 
-                      tabIndex={key} 
-                      title={value} 
-                    />
-                  </TabContent>
-                )}
-              />
-            )}
+            <Route 
+              path='/tabs/:tabIndexParam'
+              element={
+                <TabContent>
+                  <Workspace />
+                </TabContent>
+              }
+            />
             <Route
               path='*'
               element={<PageNoFound />}

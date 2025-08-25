@@ -32,10 +32,10 @@ function Toolbar({
       {/* Left side */}
       <div className="flex items-center gap-3 flex-wrap">
         <button className="flex items-center gap-1"
+          title={`${title}`}
           onClick={() => alert(`TODO: download ${title}`)}
         >
           <ArrowDownTrayIcon 
-            title={`${title}`}
             className="h-4 w-4 hover:text-blue-700" 
           />
           <span className="inline-block max-w-25 truncate max-[835px]:hidden">

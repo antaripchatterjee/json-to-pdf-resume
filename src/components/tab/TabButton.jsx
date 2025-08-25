@@ -119,7 +119,7 @@ function TabButton({ tabIndex, label, onClick }) {
             if(navigateTo) {
               navigate(`/tabs/${navigateTo}`, { replace: true })
             } else {
-              navigate('/tabs/home', { replace: true })
+              navigate('/home', { replace: true })
             }
           }
         }}

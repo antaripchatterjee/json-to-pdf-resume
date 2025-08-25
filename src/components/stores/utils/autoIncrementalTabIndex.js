@@ -29,5 +29,6 @@ export default class AutoIncrementalTabIndex {
   static reset(start = 0) {
     const instance = AutoIncrementalTabIndex.getInstance();
     instance.#counter = start;
+    return instance.#counter;
   }
 }

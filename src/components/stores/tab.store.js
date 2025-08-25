@@ -4,12 +4,14 @@ import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
 const useTabStore = create((set, get) => ({
   tabs: new Map(),
   tabStack: new Set(),
-  addTab: () => {
+  addTab: (tabIndex) => {
     set((state) => {
-      const tabIndex = AutoIncrementalTabIndex.getNext();
+      const newTabIndex = Number.isInteger(tabIndex) 
+        ? AutoIncrementalTabIndex.reset(tabIndex) 
+        : AutoIncrementalTabIndex.getNext();
       const newTabs = new Map(state.tabs);
-      newTabs.set(tabIndex, `New Tab ${tabIndex}`);
-      const newTabStack = new Set(state.tabStack).add(tabIndex);
+      newTabs.set(newTabIndex, `New Tab ${newTabIndex}`);
+      const newTabStack = new Set(state.tabStack).add(newTabIndex);
       return {
         tabs: newTabs,
         tabStack: newTabStack
@@ -50,6 +52,15 @@ const useTabStore = create((set, get) => ({
   getActiveTab: () => {
     const tabStackAsArray = [...get().tabStack];
     return tabStackAsArray[tabStackAsArray.length - 1] ?? null;
+  },
+  getTabTitle: (tabIndex) => {
+    const title = get().tabs.get(tabIndex) ?? null;
+    return title;
+  },
+  ensureTab: (tabIndex) => {
+    if (!get().tabs.has(tabIndex)) {
+      get().addTab(tabIndex);
+    }
   }
 }));
 
