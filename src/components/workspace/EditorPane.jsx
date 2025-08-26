@@ -1,10 +1,68 @@
 import React, { useRef } from "react";
 import Editor from "@monaco-editor/react";
+import Breadcrumb from "./Breadcrumb";
 import { useWorkspaceStore } from "../stores/workspace.store";
 
-export default function EditorPane({ path }) {
+export default function EditorPane({ title, path }) {
   const editorRef = useRef(null);
-  const { createOrGetModel, saveViewState, restoreViewState } = useWorkspaceStore();
+  const { createOrGetModel, saveViewState, restoreViewState, saveCursorInfo } = useWorkspaceStore();
+
+  function extractEditorInfo() {
+    if (!editorRef.current) return;
+    const editor = editorRef.current;
+    const model = editor.getModel();
+    const selections = editor.getSelections();
+    if (!selections || selections.length === 0) return;
+
+    const first = selections[0];
+    const cursorPos = first.getPosition(); // blinking cursor
+    const cursorOffset = model.getOffsetAt(cursorPos);
+
+    let info = {};
+
+    if (selections.length === 1) {
+      if (first.isEmpty()) {
+        // One cursor, no selection
+        info = {
+          line: cursorPos.lineNumber,
+          column: cursorPos.column,
+          offset: cursorOffset,
+        };
+      } else {
+        // One cursor, with selection
+        const selectedText = model.getValueInRange(first);
+        info = {
+          line: cursorPos.lineNumber,
+          column: cursorPos.column,
+          offset: cursorOffset,
+          selectedCount: [...selectedText].length,
+        };
+      }
+    } else {
+      if (selections.every(sel => sel.isEmpty())) {
+        // Multi cursor, no selection
+        info = {
+          cursorCount: selections.length,
+          offset: cursorOffset,
+        };
+      } else {
+        // Multi cursor, selections
+        let totalSelectedLength = 0;
+        for (const sel of selections) {
+          if (!sel.isEmpty()) {
+            totalSelectedLength += [...model.getValueInRange(sel)].length;
+          }
+        }
+        info = {
+          selectionCount: selections.length,
+          totalSelectedChars: totalSelectedLength,
+          offset: cursorOffset,
+        };
+      }
+    }
+
+    saveCursorInfo(path, info);
+  }
 
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
@@ -20,16 +78,28 @@ export default function EditorPane({ path }) {
     editor.onDidBlurEditorWidget(() => {
       saveViewState(path, editor);
     });
+
+    // Listen for cursor changes
+    editor.onDidChangeCursorSelection(extractEditorInfo);
+  }
+
+  function handleOnChange(value) {
+    // console.log("Content:", value ?? editorRef.current?.getValue());
+    extractEditorInfo();
   }
 
   return (
-    <Editor
-      height="100%"
-      theme="vs-dark"
-      defaultLanguage="json"
-      path={path}
-      onMount={handleEditorDidMount}
-      options={{ automaticLayout: true }}
-    />
+    <div className="w-full h-full flex flex-col">
+      <Breadcrumb title={title} />
+      <Editor
+        height="100%"
+        theme="vs-dark"
+        defaultLanguage="json"
+        path={path}
+        onChange={handleOnChange}
+        onMount={handleEditorDidMount}
+        options={{ automaticLayout: true }}
+      />
+    </div>
   );
 }

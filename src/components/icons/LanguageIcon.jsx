@@ -48,9 +48,14 @@ export const LanguageXMLIcon = (props) => (
   <TextToIcon glyph={"</>"} label="XML icon" {...props} />
 );
 
+export const LanguageTOMLIcon = (props) => (
+  <TextToIcon glyph={"[T]"} label="TOML icon" {...props} />
+);
+
 export function LanguageIcon({ type = "json", ...rest }) {
   const t = type.toLowerCase();
   if (t === "yaml" || t === "yml") return <LanguageYMLIcon {...rest} />;
   if (t === "xml") return <LanguageXMLIcon {...rest} />;
+  if (t === "toml") return <LanguageTOMLIcon {...rest} />;
   return <LanguageJSONIcon {...rest} />;
 }

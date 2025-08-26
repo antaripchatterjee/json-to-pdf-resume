@@ -71,7 +71,7 @@ function TabButtons() {
         />
         <button
           onContextMenu={toggleMenu}
-          onClick={() => { alert("TODO: search globally")}}
+          onClick={() => { alert("TODO: additional options")}}
           className="px-2 py-2 dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700"
         >
           <EllipsisVerticalIcon className="h-[20.8px] w-[20.8px]" />

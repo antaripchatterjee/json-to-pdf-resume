@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ExclamationCircleIcon,
   ExclamationTriangleIcon,
@@ -9,14 +9,13 @@ import {
 } from "@heroicons/react/24/solid";
 
 import { LanguageIcon } from "../icons/LanguageIcon";
+import { useWorkspaceStore } from "../stores/workspace.store";
 
 function Toolbar({
   title,
+  path,
   errors = [],
   warnings = [],
-  line = 0,
-  column = 0,
-  selectionCount = 0,
   indentation = 4,
   setIndentation,
   encoding = "UTF-8",
@@ -27,6 +26,9 @@ function Toolbar({
   overwrite = false,
   toggleOverwrite,
 }) {
+
+  const cursorInfo = useWorkspaceStore((state) => state.cursorInfos[path]);
+
   return (
     <div className="flex items-center justify-between min-w-full w-fit min-h-7 h-fit px-3 select-none bg-zinc-300 dark:bg-gray-800 text-xs text-gray-800 dark:text-gray-50">
       {/* Left side */}
@@ -35,8 +37,8 @@ function Toolbar({
           title={`${title}`}
           onClick={() => alert(`TODO: download ${title}`)}
         >
-          <ArrowDownTrayIcon 
-            className="h-4 w-4 hover:text-blue-700" 
+          <ArrowDownTrayIcon
+            className="h-4 w-4 hover:text-blue-700"
           />
           <span className="inline-block max-w-25 truncate max-[835px]:hidden">
             {title}
@@ -63,9 +65,35 @@ function Toolbar({
 
       {/* Middle */}
       <div className="flex items-center gap-2 max-[736px]:hidden">
-        <span>Ln {line}, Col {column}</span>
-        {selectionCount > 0 && <span>(Sel {selectionCount})</span>}
+        {cursorInfo ? (
+          <>
+            {/* Case: one cursor, no selection */}
+            {"line" in cursorInfo && "column" in cursorInfo && (
+              <span>Ln {cursorInfo.line}, Col {cursorInfo.column}</span>
+            )}
+
+            {/* Case: one cursor, selection */}
+            {"selectedCount" in cursorInfo && (
+              <span>(Sel {cursorInfo.selectedCount})</span>
+            )}
+
+            {/* Case: multi cursor, no selection */}
+            {"cursorCount" in cursorInfo && !("totalSelectedChars" in cursorInfo) && (
+              <span>Curs {cursorInfo.cursorCount}</span>
+            )}
+
+            {/* Case: multi cursor, selections */}
+            {"totalSelectedChars" in cursorInfo && (
+              <span>
+                Sels {cursorInfo.selectionCount}, Chars {cursorInfo.totalSelectedChars}
+              </span>
+            )}
+          </>
+        ) : (
+          <span>Ln 0, Col 0</span>
+        )}
       </div>
+
 
       {/* Right side */}
       <div className="flex items-center gap-4">
@@ -89,10 +117,10 @@ function Toolbar({
         <div className="flex items-center gap-0.5">
           <LanguageIcon
             type={language}
-            className="max-[430px]:!hidden" 
-            size={12} 
-            italic={false} 
-            weight={600} 
+            className="max-[430px]:!hidden"
+            size={12}
+            italic={false}
+            weight={600}
           />
           <select
             className="bg-transparent border-none outline-none max-[322px]:hidden"
@@ -119,7 +147,7 @@ function Toolbar({
           className="p-1 rounded"
           onClick={onOpenCommandPalette}
         >
-          <CommandLineIcon 
+          <CommandLineIcon
             className="w-4 h-4 hover:text-blue-700"
           />
         </button>

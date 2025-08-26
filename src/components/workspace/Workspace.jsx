@@ -24,6 +24,7 @@ function Workspace() {
     <div className='h-full'>
       <div className="flex h-full gap-6">
         <EditorPane
+          title={title}
           path={`workspace/tabs/${tabIndex}`}
         />
         {/* <PDFContainer
@@ -33,6 +34,7 @@ function Workspace() {
       </div>
       <Toolbar
         title={title}
+        path={`workspace/tabs/${tabIndex}`}
       />
     </div>
   )

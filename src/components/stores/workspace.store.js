@@ -1,6 +1,4 @@
 import { create } from "zustand";
-// import AceEditorContent from "./utils/aceEditorContent";
-import * as monaco from 'monaco-editor';
 
 export const useEditorStore = create(set => ({
   theme: 'vs-dark',
@@ -30,17 +28,28 @@ export const usePDFContainerStore = create(set => ({
 }));
 
 
+
 export const useWorkspaceStore = create((set, get) => ({
-  // Map: path (string) -> { model, viewState }
+  // Map: path -> { model, viewState }
   editors: new Map(),
 
+  // Object: path -> cursorInfo
+  cursorInfos: {},
+
   // Create or return existing model
-  createOrGetModel: (path, language, initialValue, monaco) => {
-    const uri = monaco.Uri.parse(`file:///${path}`);
+  createOrGetModel: (path, language, initialValue, monacoInstance) => {
+    const uri = monacoInstance.Uri.parse(`file:///${path}`);
     let model = monaco.editor.getModel(uri);
+
+    const editors = new Map(get().editors);
 
     if (!model) {
       model = monaco.editor.createModel(initialValue, language, uri);
+    }
+
+    if (!editors.has(path)) {
+      editors.set(path, { model, viewState: null });
+      set({ editors });
     }
 
     return model;
@@ -68,6 +77,21 @@ export const useWorkspaceStore = create((set, get) => ({
     editorInstance.focus();
   },
 
+  // Save cursor info separately
+  saveCursorInfo: (path, cursorInfo) => {
+    set((state) => ({
+      cursorInfos: {
+        ...state.cursorInfos,
+        [path]: cursorInfo,
+      },
+    }));
+  },
+
+  // Get last cursor info
+  getCursorInfo: (path) => {
+    return get().cursorInfos[path] ?? null;
+  },
+
   // Get content of a file
   getValue: (path) => {
     const editors = get().editors;
@@ -81,5 +105,61 @@ export const useWorkspaceStore = create((set, get) => ({
       editors.get(path).model.setValue(newValue);
       set({ editors });
     }
-  }
+  },
 }));
+
+
+
+// export const useWorkspaceStore = create((set, get) => ({
+//   // Map: path (string) -> { model, viewState }
+//   editors: new Map(),
+
+//   // Create or return existing model
+//   createOrGetModel: (path, language, initialValue, monaco) => {
+//     const uri = monaco.Uri.parse(`file:///${path}`);
+//     let model = monaco.editor.getModel(uri);
+
+//     if (!model) {
+//       model = monaco.editor.createModel(initialValue, language, uri);
+//     }
+
+//     return model;
+//   },
+
+//   // Save editor view state (cursor, scroll, selections)
+//   saveViewState: (path, editorInstance) => {
+//     const editors = new Map(get().editors);
+//     if (!editors.has(path)) return;
+
+//     const viewState = editorInstance.saveViewState();
+//     editors.set(path, { ...editors.get(path), viewState });
+//     set({ editors });
+//   },
+
+//   // Restore editor view state
+//   restoreViewState: (path, editorInstance) => {
+//     const editors = get().editors;
+//     if (!editors.has(path)) return;
+
+//     const { viewState } = editors.get(path);
+//     if (viewState) {
+//       editorInstance.restoreViewState(viewState);
+//     }
+//     editorInstance.focus();
+//   },
+
+//   // Get content of a file
+//   getValue: (path) => {
+//     const editors = get().editors;
+//     return editors.has(path) ? editors.get(path).model.getValue() : "";
+//   },
+
+//   // Update content programmatically
+//   setValue: (path, newValue) => {
+//     const editors = new Map(get().editors);
+//     if (editors.has(path)) {
+//       editors.get(path).model.setValue(newValue);
+//       set({ editors });
+//     }
+//   }
+// }));
