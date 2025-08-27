@@ -2,10 +2,14 @@ import React, { useRef } from "react";
 import Editor from "@monaco-editor/react";
 import Breadcrumb from "./Breadcrumb";
 import { useWorkspaceStore } from "../stores/workspace.store";
+import findBreadcrumbPath from "../../utils/quickParsers";
 
 export default function EditorPane({ title, path }) {
   const editorRef = useRef(null);
-  const { createOrGetModel, saveViewState, restoreViewState, saveCursorInfo } = useWorkspaceStore();
+  const { 
+    createOrGetModel, setEditorInstance, 
+    saveViewState, restoreViewState, 
+    saveCursor, saveBreadcrumb } = useWorkspaceStore();
 
   function extractEditorInfo() {
     if (!editorRef.current) return;
@@ -61,7 +65,12 @@ export default function EditorPane({ title, path }) {
       }
     }
 
-    saveCursorInfo(path, info);
+    saveCursor(path, info);
+    
+    const value = model.getValue();
+    const langId = model.getLanguageId();
+    const breadcrumb = findBreadcrumbPath(langId, value, cursorOffset);
+    saveBreadcrumb(path, breadcrumb);
   }
 
   function handleEditorDidMount(editor, monaco) {
@@ -70,6 +79,9 @@ export default function EditorPane({ title, path }) {
     // Create or get persistent model
     const model = createOrGetModel(path, "json", "", monaco);
     editor.setModel(model);
+
+    // Save editor instance in store
+    setEditorInstance(path, editor);
 
     // Restore state (cursor, scroll, selection, etc.)
     restoreViewState(path, editor);
@@ -90,7 +102,10 @@ export default function EditorPane({ title, path }) {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <Breadcrumb title={title} />
+      <Breadcrumb 
+        title={title}
+        path={path}
+      />
       <Editor
         height="100%"
         theme="vs-dark"

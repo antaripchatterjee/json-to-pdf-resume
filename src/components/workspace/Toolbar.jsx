@@ -27,7 +27,7 @@ function Toolbar({
   toggleOverwrite,
 }) {
 
-  const cursorInfo = useWorkspaceStore((state) => state.cursorInfos[path]);
+  const cursor = useWorkspaceStore((state) => state.cursors[path]);
 
   return (
     <div className="flex items-center justify-between min-w-full w-fit min-h-7 h-fit px-3 select-none bg-zinc-300 dark:bg-gray-800 text-xs text-gray-800 dark:text-gray-50">
@@ -65,27 +65,27 @@ function Toolbar({
 
       {/* Middle */}
       <div className="flex items-center gap-2 max-[736px]:hidden">
-        {cursorInfo ? (
+        {cursor ? (
           <>
             {/* Case: one cursor, no selection */}
-            {"line" in cursorInfo && "column" in cursorInfo && (
-              <span>Ln {cursorInfo.line}, Col {cursorInfo.column}</span>
+            {"line" in cursor && "column" in cursor && (
+              <span>Ln {cursor.line}, Col {cursor.column}</span>
             )}
 
             {/* Case: one cursor, selection */}
-            {"selectedCount" in cursorInfo && (
-              <span>(Sel {cursorInfo.selectedCount})</span>
+            {"selectedCount" in cursor && (
+              <span>(Sel {cursor.selectedCount})</span>
             )}
 
             {/* Case: multi cursor, no selection */}
-            {"cursorCount" in cursorInfo && !("totalSelectedChars" in cursorInfo) && (
-              <span>Curs {cursorInfo.cursorCount}</span>
+            {"cursorCount" in cursor && !("totalSelectedChars" in cursor) && (
+              <span>Curs {cursor.cursorCount}</span>
             )}
 
             {/* Case: multi cursor, selections */}
-            {"totalSelectedChars" in cursorInfo && (
+            {"totalSelectedChars" in cursor && (
               <span>
-                Sels {cursorInfo.selectionCount}, Chars {cursorInfo.totalSelectedChars}
+                Sels {cursor.selectionCount}, Chars {cursor.totalSelectedChars}
               </span>
             )}
           </>
