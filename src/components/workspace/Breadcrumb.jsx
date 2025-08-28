@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { Link } from 'react-router';
 import clsx from "clsx";
@@ -7,6 +7,8 @@ import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useWorkspaceStore } from '../stores/workspace.store';
 import { getJsonSiblings } from '../../utils/quickParsers';
 
+import SiblingDropdown from './SiblingDropdown';
+
 function Breadcrumb({ title, path }) {
   const breadcrumb = useWorkspaceStore(
     (state) => state.breadcrumbs[path]
@@ -14,39 +16,6 @@ function Breadcrumb({ title, path }) {
 
   function showSiblingDropdown(editor, siblings) {
     console.log(editor, siblings)
-    if (!editor) return;
-
-    const model = editor.getModel();
-    if (!model) return;
-
-    const languageId = model.getLanguageId();
-    const uri = model.uri.toString();
-
-    const suggestions = siblings.map((s) => ({
-      label: String(s),
-      kind: monaco.languages.CompletionItemKind.Property,
-      insertText: s,
-    }));
-
-    const providerKey = `breadcrumb-provider-${uri}`;
-    if (window[providerKey]) {
-      window[providerKey].dispose();
-      window[providerKey] = null;
-    }
-
-    const provider = monaco.languages.registerCompletionItemProvider(languageId, {
-      provideCompletionItems: (currentModel, position) => {
-        if (currentModel.uri.toString() !== uri) {
-          return { suggestions: [] };
-        }
-        return { suggestions };
-      },
-    });
-
-    window[providerKey] = provider;
-
-    editor.focus();
-    editor.trigger('breadcrumb', 'editor.action.triggerSuggest', {});
   }
 
   return (<div
@@ -86,4 +55,4 @@ function Breadcrumb({ title, path }) {
 }
 
 
-export default Breadcrumb
+export default Breadcrumb;

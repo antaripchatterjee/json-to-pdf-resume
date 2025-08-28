@@ -1,15 +1,18 @@
 import React, { useRef } from "react";
-import Editor from "@monaco-editor/react";
+import Editor, {useMonaco} from "@monaco-editor/react";
 import Breadcrumb from "./Breadcrumb";
 import { useWorkspaceStore } from "../stores/workspace.store";
+import { useCurrentEditorStore } from "../stores/workspace.store";
 import findBreadcrumbPath from "../../utils/quickParsers";
 
 export default function EditorPane({ title, path }) {
   const editorRef = useRef(null);
   const { 
-    createOrGetModel, setEditorInstance, 
+    setEditorInstance, 
     saveViewState, restoreViewState, 
     saveCursor, saveBreadcrumb } = useWorkspaceStore();
+  
+  const setActiveEditor = useCurrentEditorStore(state => state.setActiveEditor);
 
   function extractEditorInfo() {
     if (!editorRef.current) return;
@@ -93,6 +96,10 @@ export default function EditorPane({ title, path }) {
 
     // Listen for cursor changes
     editor.onDidChangeCursorSelection(extractEditorInfo);
+    // editor.onDidFocusEditorWidget(() => {
+    //   setActiveEditor(editor);
+    // });
+    // setActiveEditor(editor);
   }
 
   function handleOnChange(value) {
@@ -110,6 +117,7 @@ export default function EditorPane({ title, path }) {
         height="100%"
         theme="vs-dark"
         defaultLanguage="json"
+        
         path={path}
         onChange={handleOnChange}
         onMount={handleEditorDidMount}

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useMonaco } from '@monaco-editor/react';
 import { PlusIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 
 import TabButton from './TabButton';
@@ -9,7 +10,8 @@ import useTabStore from '../stores/tab.store';
 
 function TabButtons() {
   const navigate = useNavigate();
-  const { tabs, addTab, getActiveTab } = useTabStore();
+  const monaco = useMonaco();
+  const { tabs, addTab, getActiveTab, updateTabPath } = useTabStore();
   const [ tabAdded, setTabAdded] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false)
@@ -41,7 +43,7 @@ function TabButtons() {
         {[...tabs].map(([key, value]) =>
           <TabButton
             key={`tab-key-${key}`}
-            label={value}
+            label={value.title}
             tabIndex={key}
             onClick={() => navigate(`/tabs/${key}`, { replace: true })}
           />
@@ -52,8 +54,23 @@ function TabButtons() {
           <button
             onContextMenu={toggleMenu}
             onClick={() => {
+              if(!monaco) {
+                return console.warn('monaco is not ready yet')
+              }
               addTab();
-              const newTabIndex = getActiveTab()
+              
+              // console.log(monaco);
+              const newTabIndex = getActiveTab();
+              const defaultLangId = "json";
+              const path = `workspace/tabs/${newTabIndex}.${defaultLangId}`;
+              const uri = monaco.Uri.parse(`file:///${path}`)
+              let model = monaco.editor.getModel(uri);
+              if(!model) {
+                model = monaco.editor.createModel(
+                  "", defaultLangId, uri
+                )
+              }
+              updateTabPath(newTabIndex, path);
               navigate(`/tabs/${newTabIndex}`, { replace: true });
               setTabAdded(true);
             }}

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export const useEditorStore = create(set => ({
+export const useEditorGlobalStore = create(set => ({
   theme: 'vs-dark',
   fontSize: 16,
   indentSize: 2,
@@ -10,11 +10,24 @@ export const useEditorStore = create(set => ({
   setFontSize: (fontSize) => set(() => ({
     fontSize
   })),
+}));
+
+export const useCurrentEditorStore = create((set, get) => ({
+  activeEditor: null,
+  indentSize: 4,
+
+  setActiveEditor: (editor) => set(() => ({
+    activeEditor: editor
+  })),
+
+  getActiveEditor: () => get().activeEditor,
+  
   setIndentSize: (indentSize) => set(state => ({
     indentSize: ([1, 2, 4]).includes(indentSize)
       ? indentSize : state.indentSize
-  }))
-}));
+  })),
+  getIndentSize: () => get().indentSize
+}))
 
 export const usePDFContainerStore = create(set => ({
   pdfFont: 'Times-Roman',
@@ -30,8 +43,7 @@ export const usePDFContainerStore = create(set => ({
 
 
 export const useWorkspaceStore = create((set, get) => ({
-  // Map: path -> { model, viewState }
-  editors: new Map(),
+  editorPanes: new Map(),
 
   // Object: path -> cursor
   cursors: {},
@@ -69,20 +81,20 @@ export const useWorkspaceStore = create((set, get) => ({
 
   // Save editor view state (cursor, scroll, selections)
   saveViewState: (path, editorInstance) => {
-    const editors = new Map(get().editors);
-    if (!editors.has(path)) return;
+    const editorPanes = new Map(get().editorPanes);
+    if (!editorPanes.has(path)) return;
 
     const viewState = editorInstance.saveViewState();
-    editors.set(path, { ...editors.get(path), viewState });
-    set({ editors });
+    editorPanes.set(path, { ...editorPanes.get(path), viewState });
+    set({ editorPanes });
   },
 
   // Restore editor view state
   restoreViewState: (path, editorInstance) => {
-    const editors = get().editors;
-    if (!editors.has(path)) return;
+    const editorPanes = get().editorPanes;
+    if (!editorPanes.has(path)) return;
 
-    const { viewState } = editors.get(path);
+    const { viewState } = editorPanes.get(path);
     if (viewState) {
       editorInstance.restoreViewState(viewState);
     }
@@ -112,28 +124,28 @@ export const useWorkspaceStore = create((set, get) => ({
 
   // Get the model
   getModel: (path) => {
-    const editors = get().editors;
-    return editors.has(path) ? editors.get(path).model : null;
+    const editorPanes = get().editorPanes;
+    return editorPanes.has(path) ? editorPanes.get(path).model : null;
   },
 
   // Get the editor
   getEditor: (path) => {
-    const editors = get().editors;
-    return editors.has(path) ? editors.get(path).editor : null;
+    const editorPanes = get().editorPanes;
+    return editorPanes.has(path) ? editorPanes.get(path).editor : null;
   },
 
   // Get content of a file
   getValue: (path) => {
-    const editors = get().editors;
-    return editors.has(path) ? editors.get(path).model.getValue() : "";
+    const editorPanes = get().editorPanes;
+    return editorPanes.has(path) ? editorPanes.get(path).model.getValue() : "";
   },
 
   // Update content programmatically
   setValue: (path, newValue) => {
-    const editors = new Map(get().editors);
-    if (editors.has(path)) {
-      editors.get(path).model.setValue(newValue);
-      set({ editors });
+    const editorPanes = new Map(get().editorPanes);
+    if (editorPanes.has(path)) {
+      editorPanes.get(path).model.setValue(newValue);
+      set({ editorPanes });
     }
   },
 }));

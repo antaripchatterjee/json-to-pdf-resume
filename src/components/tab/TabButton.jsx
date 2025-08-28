@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import clsx from 'clsx';
 import useTabStore from '../stores/tab.store';
+import { useCurrentEditorStore, useWorkspaceStore } from '../stores/workspace.store';
 
 function TabButton({ tabIndex, label, onClick }) {
   const navigate = useNavigate();
-  const { removeTab, updateTab, setActiveTab, getActiveTab } = useTabStore();
-
+  const { removeTab, updateTabTitle, setActiveTab, getActiveTab } = useTabStore();
   const activeTabIndex = getActiveTab();
   const [editable, setEditable] = useState(false);
   const [tempLabel, setTempLabel] = useState(label);
@@ -43,7 +43,7 @@ function TabButton({ tabIndex, label, onClick }) {
     const newLabel = spanRef.current?.innerText.trim();
     if (newLabel && newLabel !== label) {
       setTempLabel(newLabel);
-      updateTab(tabIndex, newLabel);
+      updateTabTitle(tabIndex, newLabel);
     } else {
       spanRef.current.innerText = label; // restore DOM directly
       setTempLabel(label);

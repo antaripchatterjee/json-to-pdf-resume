@@ -5,18 +5,22 @@ const useTabStore = create((set, get) => ({
   tabs: new Map(),
   tabStack: new Set(),
   addTab: (tabIndex) => {
+    if(get().tabs.get(tabIndex)) return null;
+    const newTabIndex = Number.isInteger(tabIndex) 
+      ? AutoIncrementalTabIndex.reset(tabIndex) 
+      : AutoIncrementalTabIndex.getNext();
     set((state) => {
-      const newTabIndex = Number.isInteger(tabIndex) 
-        ? AutoIncrementalTabIndex.reset(tabIndex) 
-        : AutoIncrementalTabIndex.getNext();
       const newTabs = new Map(state.tabs);
-      newTabs.set(newTabIndex, `New Tab ${newTabIndex}`);
+      newTabs.set(newTabIndex, {
+        title: `New Tab ${newTabIndex}`
+      });
       const newTabStack = new Set(state.tabStack).add(newTabIndex);
       return {
         tabs: newTabs,
         tabStack: newTabStack
       };
     });
+    return newTabIndex;
   },
   removeTab: (tabIndex) => {
     const activeTabIndex = get().getActiveTab();
@@ -36,11 +40,28 @@ const useTabStore = create((set, get) => ({
       shouldNavigate: activeTabIndex === tabIndex
     };
   },
-  updateTab: (tabIndex, newLabel) => set((state) => {
-    const newTabs = new Map(state.tabs);
-    newTabs.set(tabIndex, newLabel);
-    return { tabs: newTabs };
-  }),
+  updateTabTitle: (tabIndex, newTitle) => {
+    if(!get().tabs.has(tabIndex)) return;
+    set((state) => {
+      const newTabs = new Map(state.tabs);
+      newTabs.set(tabIndex, {
+        ...(newTabs.get(tabIndex)),
+        title: newTitle
+      });
+      return { tabs: newTabs };
+    });
+  },
+  updateTabPath: (tabIndex, newPath) => {
+    if(!get().tabs.has(tabIndex)) return;
+    set((state) => {
+      const newTabs = new Map(state.tabs);
+      newTabs.set(tabIndex, {
+        ...(newTabs.get(tabIndex)),
+        path: newPath
+      });
+      return { tabs: newTabs };
+    });
+  },
   setActiveTab: (tabIndex) => set(state => {
     const newTabStack = new Set(state.tabStack);
     newTabStack.delete(tabIndex);
@@ -54,13 +75,32 @@ const useTabStore = create((set, get) => ({
     return tabStackAsArray[tabStackAsArray.length - 1] ?? null;
   },
   getTabTitle: (tabIndex) => {
-    const title = get().tabs.get(tabIndex) ?? null;
+    const {title} = get().tabs.get(tabIndex) ?? {title: null};
     return title;
   },
-  ensureTab: (tabIndex) => {
+  getTabPath: (tabIndex) => {
+    const {path} = get().tabs.get(tabIndex) ?? {path: null};
+    return path;
+  },
+  ensureTab: (tabIndex, monaco, langId) => {
+    const path = `workspace/tabs/${tabIndex}.${langId}`;
+    const uri = monaco.Uri.parse(`file:///${path}`)
+    let model = monaco.editor.getModel(uri);
     if (!get().tabs.has(tabIndex)) {
-      get().addTab(tabIndex);
+      if(get().addTab(tabIndex)) {
+        if(!model) {
+          model = monaco.editor.createModel(
+            "", langId, uri
+          );
+          if(model) {
+            get().updateTabPath(tabIndex, path);
+          }
+        }
+        return model;
+      }
+      return null;
     }
+    return model;
   }
 }));
 
