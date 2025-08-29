@@ -1,32 +1,66 @@
-import React from 'react'
-import { Navigate } from 'react-router';
+import React from "react";
+import { Outlet, Navigate, useMatch } from "react-router";
+import GridLayout from "react-grid-layout";
+import usePanelStore from "../stores/panel.store";
 
-import { usePanelStore } from '../stores/panels.store';
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 
 function PanelGrid() {
-  const { panels, isPanelVisible } = usePanelStore();
-  const visiblePanels = panels.map(({ id }) => isPanelVisible(id));
-  if (visiblePanels.length === 0) {
-    return (
-      <Navigate to="/welcome" replace />
-    )
+  const panels = usePanelStore((s) => s.panels);
+  const isPanelVisible = usePanelStore((s) => s.isPanelVisible);
+
+  // Match only the exact `/workspace`
+  const isWorkspaceRoot = useMatch("/workspace");
+  const noTabs = panels.every((p) => p.tabs.size === 0);
+
+  if (noTabs && isWorkspaceRoot) {
+    return <Navigate to="/welcome" replace />;
   }
-  const gridClassName = visiblePanels.length === 1
-    ? "grid-cols-1 grid-rows-1"
-    : visiblePanels.length === 2
-    ? "grid-cols-2 grid-rows-1"
-    : "grid-cols-2 grid-rows-2";
+
+  // Layout: give each visible panel a grid position
+  const layout = panels
+    .filter((p) => isPanelVisible(p.id))
+    .map((p, idx) => ({
+      i: String(p.id),
+      x: idx % 2, // 2 panels per row
+      y: Math.floor(idx / 2),
+      w: 1,
+      h: 1,
+    }));
+
   return (
-    <div className="h-full w-full grid gap-1 p-1 bg-gray-200">
-      <div className={`grid ${gridClassName} gap-1 w-full h-full`}>
-        {visiblePanels.map((panel) => (
-          <div key={panel.id} className="bg-white rounded shadow overflow-hidden">
-            <PanelContainer panelId={panel.id} />
-          </div>
-        ))}
-      </div>
+    <div className="h-full w-full">
+      <GridLayout
+        className="layout"
+        layout={layout}
+        cols={2}
+        rowHeight={400}
+        width={1200}
+      >
+        {panels.map((panel) =>
+          isPanelVisible(panel.id) ? (
+            <div
+              key={panel.id}
+              className="rounded-xl shadow-md bg-white dark:bg-gray-800 p-4"
+            >
+              <h2 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                Panel {panel.id}
+              </h2>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {panel.tabs.size === 0
+                  ? "No tabs here yet"
+                  : `Tabs: ${Array.from(panel.tabs).join(", ")}`}
+              </div>
+            </div>
+          ) : null
+        )}
+      </GridLayout>
+
+      {/* Nested routes (NewTab, TabContent, etc.) */}
+      <Outlet />
     </div>
-  )
+  );
 }
 
-export default PanelGrid
+export default PanelGrid;

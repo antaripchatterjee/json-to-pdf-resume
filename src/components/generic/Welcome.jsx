@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { Link } from 'react-router';
 import {
   PlusCircleIcon,
@@ -7,43 +7,32 @@ import {
   FolderOpenIcon,
 } from "@heroicons/react/24/outline"; // heroicons
 
-import { useMonaco } from '@monaco-editor/react';
-import useTabStore from '../stores/tab.store';
-import { usePanelStore } from '../stores/panels.store';
-
 function Welcome({panelId}) {
-  const _panelId = Number.isInteger(panelId) ? panelId : 1;
-  const parentPageUrl = Number.isInteger(panelId) ? `/panels/${panelId}`: '';
-
-  const monaco = useMonaco();
-  const addTab = useTabStore(state => state.addTab);
-  const addTabIndexToPanel = usePanelStore(state => state.addTabIndexToPanel);
+  const toPanelId = Number.isInteger(panelId) ? Math(panelId) : 1;
+  const destParams = Number.isInteger(panelId) ? `?onPanel=${panelId}`: '';
   
   const actions = [
     {
       label: "New Tab",
-      to: `/panels/${_panelId}/tabs/new`,
+      to: `/workspace/new?onPanel=${toPanelId}`,
       icon: <PlusCircleIcon className="w-5 h-5" />,
-      color: "bg-blue-600 text-white hover:bg-blue-700",
-      onClick: () => {
-        const newTabIndex = addTab(monaco, "json")
-      }
+      color: "bg-blue-600 text-white hover:bg-blue-700"
     },
     {
       label: "Open Folder",
-      to: `/panel/${_panelId}/tab/open`,
+      to: `/workspace/open?onPanel=${toPanelId}`,
       icon: <FolderOpenIcon className="w-5 h-5" />,
       color: "dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700",
     },
     {
       label: "Settings",
-      to: `${parentPageUrl}/settings`,
+      to: `/settings${destParams}`,
       icon: <Cog6ToothIcon className="w-5 h-5" />,
       color: "dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700",
     },
     {
       label: "Help",
-      to: `${parentPageUrl}/docs`,
+      to: `/docs${destParams}`,
       icon: <QuestionMarkCircleIcon className="w-5 h-5" />,
       color: "dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700",
     },

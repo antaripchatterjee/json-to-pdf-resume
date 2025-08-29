@@ -21,6 +21,7 @@ import Welcome from './components/generic/Welcome';
 import Settings from './components/generic/Settings';
 import Docs from './components/generic/Docs';
 import PageNoFound from './components/errors/PageNoFound';
+import NewTab from './components/workspace/NewTab';
 
 const BOILERPLATES = {
   '!xyz': `{
@@ -210,11 +211,20 @@ function App() {
                 )}
               />
               <Route
-                path="/panels"
+                path="/workspace"
                 element={(
                   <PanelGrid />
                 )}
-              />
+              >
+                <Route 
+                  path="new" 
+                  element={<NewTab />}
+                />
+                <Route 
+                  path=":tabIndexParam" 
+                  element={<div>TODO: Write logic open the tab in a proper panel</div>}
+                />
+              </Route>
               <Route
                 path="/help"
                 element={
