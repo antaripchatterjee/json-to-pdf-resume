@@ -4,15 +4,24 @@ import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
 const useTabStore = create((set, get) => ({
   tabs: new Map(),
   tabStack: new Set(),
-  addTab: (tabIndex) => {
-    if(get().tabs.get(tabIndex)) return null;
-    const newTabIndex = Number.isInteger(tabIndex) 
+  addTab: (monaco, langId, tabIndex) => {
+    if(!monaco) return null;
+    if(tabIndex && get().tabs.get(tabIndex)) return null;
+    const newTabIndex = Number.isInteger(tabIndex)
       ? AutoIncrementalTabIndex.reset(tabIndex) 
       : AutoIncrementalTabIndex.getNext();
+    const path = `workspace/tabs/${newTabIndex}.${langId}`;
+    const uri = monaco.Uri.parse(`file:///${path}`);
+    let model = monaco.editor.getModel(uri);
+    if(!model) {
+      model = monaco.editor.createModel("", langId, uri);
+    }
+    if(!model) return null;
     set((state) => {
       const newTabs = new Map(state.tabs);
       newTabs.set(newTabIndex, {
-        title: `New Tab ${newTabIndex}`
+        title: `New Tab ${newTabIndex}`,
+        path: path
       });
       const newTabStack = new Set(state.tabStack).add(newTabIndex);
       return {
@@ -89,9 +98,7 @@ const useTabStore = create((set, get) => ({
     if (!get().tabs.has(tabIndex)) {
       if(get().addTab(tabIndex)) {
         if(!model) {
-          model = monaco.editor.createModel(
-            "", langId, uri
-          );
+          model = monaco.editor.createModel("", langId, uri);
           if(model) {
             get().updateTabPath(tabIndex, path);
           }

@@ -8,7 +8,7 @@ import TabMenu from './TabMenu';
 
 import useTabStore from '../stores/tab.store';
 
-function TabButtons() {
+function TabButtonGroup() {
   const navigate = useNavigate();
   const monaco = useMonaco();
   const { tabs, addTab, getActiveTab, updateTabPath } = useTabStore();
@@ -57,22 +57,13 @@ function TabButtons() {
               if(!monaco) {
                 return console.warn('monaco is not ready yet')
               }
-              addTab();
-              
-              // console.log(monaco);
-              const newTabIndex = getActiveTab();
-              const defaultLangId = "json";
-              const path = `workspace/tabs/${newTabIndex}.${defaultLangId}`;
-              const uri = monaco.Uri.parse(`file:///${path}`)
-              let model = monaco.editor.getModel(uri);
-              if(!model) {
-                model = monaco.editor.createModel(
-                  "", defaultLangId, uri
-                )
+              const newTabIndex = addTab(monaco, "json");
+              if(newTabIndex) {
+                navigate(`/tabs/${newTabIndex}`, { replace: true });
+                setTabAdded(true);
+              } else {
+                navigate('/error/CouldNotCreateNewTab', { replace: true });
               }
-              updateTabPath(newTabIndex, path);
-              navigate(`/tabs/${newTabIndex}`, { replace: true });
-              setTabAdded(true);
             }}
             className="px-2 py-2 dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700"
           >
@@ -99,4 +90,4 @@ function TabButtons() {
   )
 }
 
-export default TabButtons;
+export default TabButtonGroup;

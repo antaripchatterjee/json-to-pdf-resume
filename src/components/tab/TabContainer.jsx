@@ -7,7 +7,7 @@ import React from 'react'
 // const UniqueHistoryRouter = ExperimentalHistoryRouter;
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
-import TabButtons from './TabButtons';
+import TabButtonGroup from './TabButtonGroup';
 import TabContent from './TabContent';
 // import useTabStore from '../stores/tab.store';
 
@@ -26,7 +26,7 @@ function TabContainer() {
   return (
     <BrowserRouter /*history={history}*/>
       <div className="mx-auto h-full relative">
-        <TabButtons />
+        <TabButtonGroup />
         <div className="h-full">
           <Routes>
             <Route

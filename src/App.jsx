@@ -14,7 +14,7 @@ import './App.css';
 // import ToggleButton from './components/ToggleButton';
 // import IconButton from './components/IconButton';
 // import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
-import Branding from './components/navber/Branding';
+import Branding from './components/navbar/Branding';
 import TabContainer from './components/tab/TabContainer';
 
 const BOILERPLATES = {

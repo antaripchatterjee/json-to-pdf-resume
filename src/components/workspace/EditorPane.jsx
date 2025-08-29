@@ -79,12 +79,14 @@ export default function EditorPane({ title, path }) {
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
 
+    console.log('onMount called')
     // Create or get persistent model
-    const model = createOrGetModel(path, "json", "", monaco);
-    editor.setModel(model);
+    // const model = createOrGetModel(path, "json", "", monaco);
+    // editor.setModel(model);
 
     // Save editor instance in store
     setEditorInstance(path, editor);
+
 
     // Restore state (cursor, scroll, selection, etc.)
     restoreViewState(path, editor);
