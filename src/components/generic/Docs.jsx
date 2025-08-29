@@ -1,14 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-function Home(props) {
+function Docs(props) {
   return (
     <div className='text-gray-900 font-bold'>
-      Home Tab
+      Docs Tab
     </div>
   )
 }
 
-Home.propTypes = {}
+Docs.propTypes = {}
 
-export default Home
+export default Docs

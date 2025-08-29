@@ -15,7 +15,12 @@ import './App.css';
 // import IconButton from './components/IconButton';
 // import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import Branding from './components/navbar/Branding';
-import TabContainer from './components/tab/TabContainer';
+import PanelGrid from './components/panel/PanelGrid';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
+import Welcome from './components/generic/Welcome';
+import Settings from './components/generic/Settings';
+import Docs from './components/generic/Docs';
+import PageNoFound from './components/errors/PageNoFound';
 
 const BOILERPLATES = {
   '!xyz': `{
@@ -181,7 +186,56 @@ function App() {
       <div className="w-screen h-screen mx-auto px-4 py-2">
         <Branding />
         <div className='min-w-[250px] w-full h-[80%]'>
-          <TabContainer />
+          <BrowserRouter>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Navigate
+                    to="/welcome"
+                    replace
+                  />
+                }
+              />
+              <Route
+                path="/welcome"
+                element={(
+                  <Welcome />
+                )}
+              />
+              <Route
+                path="/settings"
+                element={(
+                  <Settings />
+                )}
+              />
+              <Route
+                path="/panels"
+                element={(
+                  <PanelGrid />
+                )}
+              />
+              <Route
+                path="/help"
+                element={
+                  <Navigate
+                    to="/docs"
+                    replace
+                  />
+                }
+              />
+              <Route
+                path="/docs"
+                element={(
+                  <Docs />
+                )}
+              />
+              <Route
+                path='*'
+                element={<PageNoFound />}
+              />
+            </Routes>
+          </BrowserRouter>
         </div>
       </div>
     </div>

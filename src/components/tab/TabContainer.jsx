@@ -1,30 +1,19 @@
-import React from 'react'
-// import {
-//   // HistoryRouter as StableHistoryRouter,
-//   unstable_HistoryRouter as ExperimentalHistoryRouter
-// } from "react-router";
-
-// const UniqueHistoryRouter = ExperimentalHistoryRouter;
+import React from 'react';
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import TabButtonGroup from './TabButtonGroup';
 import TabContent from './TabContent';
-// import useTabStore from '../stores/tab.store';
 
 import PageNoFound from '../errors/PageNoFound';
 import Workspace from '../workspace/Workspace';
-import Home from '../workspace/Home';
-import Settings from '../workspace/Settings';
-import Help from '../workspace/Help';
-
-// import uniqueBrowserHistory from '../../utils/uniqueBrowserHistory';
+import Home from '../generic/Welcome';
+import Settings from '../generic/Settings';
+import Help from '../generic/Docs';
 
 
 function TabContainer() {
-  // const { tabs } = useTabStore();
-  // const history = uniqueBrowserHistory();
   return (
-    <BrowserRouter /*history={history}*/>
+    <BrowserRouter>
       <div className="mx-auto h-full relative">
         <TabButtonGroup />
         <div className="h-full">
