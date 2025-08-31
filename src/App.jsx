@@ -184,9 +184,9 @@ function App() {
 
   return (
     <div className="max-w-screen min-w-screen min-h-screen max-h-screen">
-      <div className="w-screen h-screen mx-auto px-4 py-2">
+      <div className="w-screen h-screen mx-auto">
         <Branding />
-        <div className='min-w-[250px] w-full h-[80%]'>
+        <div className='min-w-[250px] w-full h-[80%] px-4 py-2'>
           <BrowserRouter>
             <Routes>
               <Route

@@ -1,66 +1,168 @@
 import React from "react";
-import { Outlet, Navigate, useMatch } from "react-router";
-import GridLayout from "react-grid-layout";
+import {
+  Panel,
+  PanelGroup,
+  PanelResizeHandle,
+} from "react-resizable-panels";
+import { Outlet, useNavigate, useMatch } from "react-router";
 import usePanelStore from "../stores/panel.store";
+import PanelView from "./PanelView";
 
-import "react-grid-layout/css/styles.css";
-import "react-resizable/css/styles.css";
 
-function PanelGrid() {
+export default function PanelGrid() {
+  const navigate = useNavigate();
   const panels = usePanelStore((s) => s.panels);
-  const isPanelVisible = usePanelStore((s) => s.isPanelVisible);
+  const prefs = usePanelStore((s) => s.userPrefs);
 
-  // Match only the exact `/workspace`
+  
   const isWorkspaceRoot = useMatch("/workspace");
-  const noTabs = panels.every((p) => p.tabs.size === 0);
-
-  if (noTabs && isWorkspaceRoot) {
-    return <Navigate to="/welcome" replace />;
+  const noTabsAnywhere = panels.every((p) => p.tabStack.size === 0);
+  
+  React.useEffect(() => {
+    if (noTabsAnywhere && isWorkspaceRoot) {
+      navigate("/welcome", { replace: true });
+    }
+  }, [noTabsAnywhere, isWorkspaceRoot, navigate]);
+  
+  const visiblePanels = panels.filter((p) => p.tabStack.size > 0);
+  if(visiblePanels.length === 0) {
+    return (
+      <Outlet />
+    )
   }
 
-  // Layout: give each visible panel a grid position
-  const layout = panels
-    .filter((p) => isPanelVisible(p.id))
-    .map((p, idx) => ({
-      i: String(p.id),
-      x: idx % 2, // 2 panels per row
-      y: Math.floor(idx / 2),
-      w: 1,
-      h: 1,
-    }));
+  if (visiblePanels.length === 1) {
+    return (
+      <PanelGroup direction="vertical" className="w-full h-full">
+        <Panel id={`panel-${visiblePanels[0].id}`} className="w-full h-full">
+          <PanelView panelId={visiblePanels[0].id} />
+        </Panel>
+      </PanelGroup>
+    );
+  }
 
-  return (
-    <div className="h-full w-full">
-      <GridLayout
-        className="layout"
-        layout={layout}
-        cols={2}
-        rowHeight={400}
-        width={1200}
-      >
-        {panels.map((panel) =>
-          isPanelVisible(panel.id) ? (
-            <div
-              key={panel.id}
-              className="rounded-xl shadow-md bg-white dark:bg-gray-800 p-4"
-            >
-              <h2 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                Panel {panel.id}
-              </h2>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {panel.tabs.size === 0
-                  ? "No tabs here yet"
-                  : `Tabs: ${Array.from(panel.tabs).join(", ")}`}
-              </div>
-            </div>
-          ) : null
-        )}
-      </GridLayout>
+  if (visiblePanels.length === 2) {
+    const dir = prefs.twoPanelMode === "horizontal" ? "horizontal" : "vertical";
+    return (
+      <PanelGroup direction={dir} className="w-full h-full">
+        {visiblePanels.map((p, idx) => (
+          <React.Fragment key={p.id}>
+            {idx > 0 && <PanelResizeHandle className="bg-border w-1" />}
+            <Panel id={`panel-${p.id}`} className="w-full h-full min-w-[150px] min-h-[150px]">
+              <PanelView panelId={p.id} />
+            </Panel>
+          </React.Fragment>
+        ))}
+      </PanelGroup>
+    );
+  }
 
-      {/* Nested routes (NewTab, TabContent, etc.) */}
-      <Outlet />
-    </div>
-  );
+  if (visiblePanels.length === 3) {
+    const mode = prefs.threePanelMode;
+    if (mode === "top-split" || mode === "bottom-split") {
+      return (
+        <PanelGroup direction="vertical" className="w-full h-full">
+          <Panel>
+            {mode === "top-split" ? (
+              <PanelGroup direction="horizontal">
+                <Panel>
+                  <PanelView panelId={visiblePanels[0].id} />
+                </Panel>
+                <PanelResizeHandle className="bg-border w-1" />
+                <Panel>
+                  <PanelView panelId={visiblePanels[1].id} />
+                </Panel>
+              </PanelGroup>
+            ) : (
+              <PanelView panelId={visiblePanels[0].id} />
+            )}
+          </Panel>
+          <PanelResizeHandle className="bg-border h-1" />
+          <Panel>
+            {mode === "bottom-split" ? (
+              <PanelGroup direction="horizontal">
+                <Panel>
+                  <PanelView panelId={visiblePanels[1].id} />
+                </Panel>
+                <PanelResizeHandle className="bg-border w-1" />
+                <Panel>
+                  <PanelView panelId={visiblePanels[2].id} />
+                </Panel>
+              </PanelGroup>
+            ) : (
+              <PanelView panelId={visiblePanels[2].id} />
+            )}
+          </Panel>
+        </PanelGroup>
+      );
+    }
+    // left-split / right-split
+    return (
+      <PanelGroup direction="horizontal" className="w-full h-full">
+        <Panel>
+          {mode === "left-split" ? (
+            <PanelGroup direction="vertical">
+              <Panel>
+                <PanelView panelId={visiblePanels[0].id} />
+              </Panel>
+              <PanelResizeHandle className="bg-border h-1" />
+              <Panel>
+                <PanelView panelId={visiblePanels[1].id} />
+              </Panel>
+            </PanelGroup>
+          ) : (
+            <PanelView panelId={visiblePanels[0].id} />
+          )}
+        </Panel>
+        <PanelResizeHandle className="bg-border w-1" />
+        <Panel>
+          {mode === "right-split" ? (
+            <PanelGroup direction="vertical">
+              <Panel>
+                <PanelView panelId={visiblePanels[1].id} />
+              </Panel>
+              <PanelResizeHandle className="bg-border h-1" />
+              <Panel>
+                <PanelView panelId={visiblePanels[2].id} />
+              </Panel>
+            </PanelGroup>
+          ) : (
+            <PanelView panelId={visiblePanels[2].id} />
+          )}
+        </Panel>
+      </PanelGroup>
+    );
+  }
+
+  if (visiblePanels.length === 4) {
+    return (
+      <PanelGroup direction="vertical" className="w-full h-full">
+        <Panel>
+          <PanelGroup direction="horizontal">
+            <Panel>
+              <PanelView panelId={visiblePanels[0].id} />
+            </Panel>
+            <PanelResizeHandle className="bg-border w-1" />
+            <Panel>
+              <PanelView panelId={visiblePanels[1].id} />
+            </Panel>
+          </PanelGroup>
+        </Panel>
+        <PanelResizeHandle className="bg-border h-1" />
+        <Panel>
+          <PanelGroup direction="horizontal">
+            <Panel>
+              <PanelView panelId={visiblePanels[2].id} />
+            </Panel>
+            <PanelResizeHandle className="bg-border w-1" />
+            <Panel>
+              <PanelView panelId={visiblePanels[3].id} />
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
+    );
+  }
+
+  return null;
 }
-
-export default PanelGrid;

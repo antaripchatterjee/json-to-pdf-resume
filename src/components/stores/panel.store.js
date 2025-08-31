@@ -10,6 +10,11 @@ const usePanelStore = create((set, get) => ({
     tabStack: new Set(),
   })),
 
+  userPrefs: {
+    twoPanelMode: "horizontal",       // "horizontal" | "vertical"
+    threePanelMode: "right-split",    // "top-split" | "bottom-split" | "left-split" | "right-split"
+  },
+
   activePanelId: 1,
 
   addTab: (panelId, monaco, langId, tabIndex) => {
@@ -172,8 +177,25 @@ const usePanelStore = create((set, get) => ({
     return panelId;
   },
   getActivePanel: () => get().activePanelId,
-  isPanelVisible: (panelId) =>  (panelId < 1 || panelId > 4) && 
-    get().panels.find(({id}) => id ===panelId)?.tabStack?.size > 0
+  isPanelVisible: (panelId) =>  (panelId >= 1 && panelId <= 4) && 
+    get().panels.find(({id}) => id ===panelId)?.tabStack?.size > 0,
+  setTwoPanelLayoutPref: (preference) => {
+    if(preference !== "horizontal" || preference !== "vertical") {
+      return;
+    }
+    set(state => ({
+      userPrefs: { ...state.userPrefs, twoPanelMode: preference }
+    }));
+  },
+  setThreePanelLayoutPref: (preference) => {
+    if(preference !== "top-split" || preference !== "bottom-split"
+      || preference !== "left-split" || preference !== "right-split") {
+      return;
+    }
+    set(state => ({
+      userPrefs: { ...state.userPrefs, threePanelMode: preference }
+    }));
+  }
 }));
 
 export default usePanelStore;
