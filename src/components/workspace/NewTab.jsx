@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useNavigate, useSearchParams, Navigate } from 'react-router'
 
 import { useMonaco } from '@monaco-editor/react';
-import usePanelStore from '../stores/panel.store';
+import {usePanelStore} from '../stores/panel.store';
 import Loading from '../generic/Loading';
 
 function NewTab() {

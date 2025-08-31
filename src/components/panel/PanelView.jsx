@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router";
-import usePanelStore from "../stores/panel.store";
+import {usePanelStore} from "../stores/panel.store";
 
 function PanelView({ panelId }) {
   const isVisible = usePanelStore((s) => s.isPanelVisible(panelId));

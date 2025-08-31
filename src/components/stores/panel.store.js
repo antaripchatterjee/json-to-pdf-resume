@@ -3,17 +3,12 @@ import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
 
 const MAX_PANELS = 4;
 
-const usePanelStore = create((set, get) => ({
+export const usePanelStore = create((set, get) => ({
   panels: Array.from({ length: MAX_PANELS }, (_, i) => ({
     id: i + 1,
     tabs: new Map(),
     tabStack: new Set(),
   })),
-
-  userPrefs: {
-    twoPanelMode: "horizontal",       // "horizontal" | "vertical"
-    threePanelMode: "right-split",    // "top-split" | "bottom-split" | "left-split" | "right-split"
-  },
 
   activePanelId: 1,
 
@@ -179,23 +174,47 @@ const usePanelStore = create((set, get) => ({
   getActivePanel: () => get().activePanelId,
   isPanelVisible: (panelId) =>  (panelId >= 1 && panelId <= 4) && 
     get().panels.find(({id}) => id ===panelId)?.tabStack?.size > 0,
-  setTwoPanelLayoutPref: (preference) => {
-    if(preference !== "horizontal" || preference !== "vertical") {
-      return;
-    }
-    set(state => ({
-      userPrefs: { ...state.userPrefs, twoPanelMode: preference }
-    }));
-  },
-  setThreePanelLayoutPref: (preference) => {
-    if(preference !== "top-split" || preference !== "bottom-split"
-      || preference !== "left-split" || preference !== "right-split") {
-      return;
-    }
-    set(state => ({
-      userPrefs: { ...state.userPrefs, threePanelMode: preference }
-    }));
-  }
 }));
 
-export default usePanelStore;
+
+export const useLayoutStore = create((set, get) => ({
+  layout: [[]],
+  
+  setLayout: (newLayout) => set({ layout: newLayout }),
+
+  addColumn: () => {
+    const layout = [...get().layout];
+    layout.push([]);
+    set({ layout });
+  },
+
+  removeColumn: (colIndex) => {
+    const layout = get().layout.filter((_, i) => i !== colIndex);
+    set({ layout });
+  },
+
+  addRow: (colIndex, panelId) => {
+    const layout = [...get().layout];
+    if (!layout[colIndex]) layout[colIndex] = [];
+    layout[colIndex] = [...layout[colIndex], panelId];
+    set({ layout });
+  },
+
+  removeRow: (colIndex, rowIndex) => {
+    const layout = [...get().layout];
+    if (layout[colIndex]) {
+      layout[colIndex] = layout[colIndex].filter((_, i) => i !== rowIndex);
+    }
+    set({ layout });
+  },
+
+  movePanel: (fromCol, fromRow, toCol, toRow) => {
+    const layout = [...get().layout].map((col) => [...col]);
+
+    const [panelId] = layout[fromCol].splice(fromRow, 1); // remove
+    layout[toCol].splice(toRow, 0, panelId); // insert
+
+    set({ layout });
+  },
+}));
+
