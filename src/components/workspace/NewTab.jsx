@@ -11,16 +11,14 @@ function NewTab() {
   const addTab = usePanelStore(state => state.addTab);
   const [searchParams, _] = useSearchParams();
 
-  const onPanelSearchParam = searchParams.get('onPanel');
-  const onPanelId = Number(onPanelSearchParam);
-  if (Number.isNaN(onPanelId) || !Number.isInteger(onPanelId)) {
-    return (
-      <Navigate to="/error/InvalidPanelId" replace />
-    )
-  }
-
-
   useEffect(() => {
+    if(!searchParams) return;
+    const onPanelSearchParam = searchParams.get('onPanel');
+    const onPanelId = Number(onPanelSearchParam);
+    if (Number.isNaN(onPanelId) || !Number.isInteger(onPanelId)) {
+      console.error('Invalid panel id')
+      return navigate('/error/InvalidPanelId', { replace: true })
+    }
     if (monaco) {
       const newTabIndex = addTab(onPanelId, monaco, "json");
       if (!newTabIndex) {
@@ -30,7 +28,10 @@ function NewTab() {
         navigate(`/workspace/${newTabIndex}?onPanel=${onPanelId}`, { replace: true })
       }
     }
-  }, [monaco])
+  }, [searchParams, addTab, monaco, navigate])
+  
+
+
 
   return (
     <Loading message='Creating new tab...' />

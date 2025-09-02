@@ -1,16 +1,84 @@
 import { create } from "zustand";
 import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
+import AutoIncrementalPanelIndex from "./utils/autoIncrementalPanelIndex";
 
-const MAX_PANELS = 4;
+const RESERVED_EXPLORER_PANEL_ID_LEFT = AutoIncrementalPanelIndex.getNext();
+const RESERVED_EXPLORER_PANEL_ID_RIGHT = AutoIncrementalPanelIndex.getNext();
+const RESERVED_PDF_PREVIEWER_PANEL_ID_1 = AutoIncrementalPanelIndex.getNext();
+const RESERVED_PDF_PREVIEWER_PANEL_ID_2 = AutoIncrementalPanelIndex.getNext();
+
+const RESERVED_WORKSPACE_PANEL_ID_1 = AutoIncrementalPanelIndex.reset(1024);
+
+function findPaths(arr, matcher, maxMatch = -1) {
+  const results = [];
+
+  function helper(subArr, path) {
+    for (let i = 0; i < subArr.length; i++) {
+      const item = subArr[i];
+      const currentPath = [...path, i];
+
+      if (matcher(item)) {
+        results.push(currentPath);
+        if (maxMatch > -1 && results.length >= maxMatch) {
+          return true; // stop early
+        }
+      }
+
+      if (Array.isArray(item)) {
+        if (helper(item, currentPath)) {
+          return true; // propagate stop
+        }
+      }
+    }
+    return false;
+  }
+
+  helper(arr, []);
+  return results;
+}
 
 export const usePanelStore = create((set, get) => ({
-  panels: Array.from({ length: MAX_PANELS }, (_, i) => ({
-    id: i + 1,
-    tabs: new Map(),
-    tabStack: new Set(),
-  })),
+  panels: [
+    [
+      {
+        id: RESERVED_EXPLORER_PANEL_ID_LEFT,
+        type: "utility",
+        name: "All Tabs",
+        classes: "explorer",
+        visibility: false,
+        siblingsAllowed: false,
+        objects: null,
+      },
+    ],
+    [
+      [
+        {
+          id: AutoIncrementalPanelIndex.getNext(),
+          type: "workspace",
+          classes: (self) => `editor-panel editor-panel-${self.id}`,
+          visibility: (self) => self.objects.tabStack.size > 0,
+          siblingsAllowed: true,
+          objects: {
+            tabs: new Map(),
+            tabStack: new Set(),
+          },
+        },
+      ],
+    ],
+    [
+      {
+        id: RESERVED_EXPLORER_PANEL_ID_RIGHT,
+        type: "utility",
+        name: "All Tabs",
+        classes: "explorer",
+        visibility: false,
+        siblingsAllowed: false,
+        objects: null,
+      },
+    ],
+  ],
 
-  activePanelId: 1,
+  activePanelPath: [0],
 
   addTab: (panelId, monaco, langId, tabIndex) => {
     if (!monaco) return null;
@@ -79,11 +147,11 @@ export const usePanelStore = create((set, get) => ({
   },
 
   setActiveTab: (panelId, tabIndex, mode = 0) => {
-    if(panelId < 1 || panelId > 4) return null;
     set((state) => {
       let panels = [...state.panels];
 
-      const foundInPanel = panels.findLast(panel => panel.tabs.has(tabIndex))?.id ?? -1;
+      const foundInPanel =
+        panels.findLast((panel) => panel.tabs.has(tabIndex))?.id ?? -1;
 
       if (foundInPanel !== panelId) {
         // copy/move logic
@@ -97,7 +165,9 @@ export const usePanelStore = create((set, get) => ({
           const newStack = new Set(sourcePanel.tabStack);
           newStack.delete(tabIndex);
           panels = panels.map((p) =>
-            p.id === foundInPanel ? { ...p, tabs: newTabs, tabStack: newStack } : p
+            p.id === foundInPanel
+              ? { ...p, tabs: newTabs, tabStack: newStack }
+              : p
           );
         }
 
@@ -167,54 +237,75 @@ export const usePanelStore = create((set, get) => ({
   },
 
   setActivePanel: (panelId) => {
-    if(panelId < 1 || panelId > 4) return null;
-    set({ activePanelId: panelId });
-    return panelId;
-  },
-  getActivePanel: () => get().activePanelId,
-  isPanelVisible: (panelId) =>  (panelId >= 1 && panelId <= 4) && 
-    get().panels.find(({id}) => id ===panelId)?.tabStack?.size > 0,
-}));
-
-
-export const useLayoutStore = create((set, get) => ({
-  layout: [[]],
-  
-  setLayout: (newLayout) => set({ layout: newLayout }),
-
-  addColumn: () => {
-    const layout = [...get().layout];
-    layout.push([]);
-    set({ layout });
-  },
-
-  removeColumn: (colIndex) => {
-    const layout = get().layout.filter((_, i) => i !== colIndex);
-    set({ layout });
-  },
-
-  addRow: (colIndex, panelId) => {
-    const layout = [...get().layout];
-    if (!layout[colIndex]) layout[colIndex] = [];
-    layout[colIndex] = [...layout[colIndex], panelId];
-    set({ layout });
-  },
-
-  removeRow: (colIndex, rowIndex) => {
-    const layout = [...get().layout];
-    if (layout[colIndex]) {
-      layout[colIndex] = layout[colIndex].filter((_, i) => i !== rowIndex);
+    const paths = findPaths(get().panels, (panel) => panel.id === panelId, 1);
+    if (paths.length === 0) {
+      return console.warn(`Could not find panel with id ${panelId}`);
     }
-    set({ layout });
+    set({
+      activePanelPath: [...paths[0]],
+    });
   },
-
-  movePanel: (fromCol, fromRow, toCol, toRow) => {
-    const layout = [...get().layout].map((col) => [...col]);
-
-    const [panelId] = layout[fromCol].splice(fromRow, 1); // remove
-    layout[toCol].splice(toRow, 0, panelId); // insert
-
-    set({ layout });
+  getActivePanelPath: () => {
+    return get().activePanelPath;
+  },
+  getPanelInfoByPath: (path) => {
+    let panelInfo = get().panels;
+    for (const path_index of path) {
+      panelInfo = panelInfo[path_index] ?? null;
+      if (!panelInfo) {
+        break;
+      }
+    }
+    return structuredClone(panelInfo);
+  },
+  isPanelVisible: (panelId) => {
+    return (
+      findPaths(
+        get().panels,
+        (panel) => panel?.id === panelId && panel?.tabStack?.size > 0,
+        1
+      ).length > 0
+    );
   },
 }));
 
+// export const useLayoutStore = create((set, get) => ({
+//   layout: [[]],
+
+//   setLayout: (newLayout) => set({ layout: newLayout }),
+
+//   addColumn: () => {
+//     const layout = [...get().layout];
+//     layout.push([]);
+//     set({ layout });
+//   },
+
+//   removeColumn: (colIndex) => {
+//     const layout = get().layout.filter((_, i) => i !== colIndex);
+//     set({ layout });
+//   },
+
+//   addRow: (colIndex, panelId) => {
+//     const layout = [...get().layout];
+//     if (!layout[colIndex]) layout[colIndex] = [];
+//     layout[colIndex] = [...layout[colIndex], panelId];
+//     set({ layout });
+//   },
+
+//   removeRow: (colIndex, rowIndex) => {
+//     const layout = [...get().layout];
+//     if (layout[colIndex]) {
+//       layout[colIndex] = layout[colIndex].filter((_, i) => i !== rowIndex);
+//     }
+//     set({ layout });
+//   },
+
+//   movePanel: (fromCol, fromRow, toCol, toRow) => {
+//     const layout = [...get().layout].map((col) => [...col]);
+
+//     const [panelId] = layout[fromCol].splice(fromRow, 1); // remove
+//     layout[toCol].splice(toRow, 0, panelId); // insert
+
+//     set({ layout });
+//   },
+// }));

@@ -7,8 +7,12 @@ import {
   FolderOpenIcon,
 } from "@heroicons/react/24/outline"; // heroicons
 
+import { usePanelStore } from '../stores/panel.store';
+
 function Welcome({panelId}) {
-  const toPanelId = Number.isInteger(panelId) ? Math(panelId) : 1;
+  const getActivePanelPath = usePanelStore(s => s.getActivePanelPath);
+  console.log(getActivePanelPath())
+  const toPanelId = Number.isInteger(panelId) ? panelId : 1;
   const destParams = Number.isInteger(panelId) ? `?onPanel=${panelId}`: '';
   
   const actions = [
