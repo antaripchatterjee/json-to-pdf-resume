@@ -9,12 +9,9 @@ import {
 
 import { usePanelStore } from '../stores/panel.store';
 
-function Welcome({panelId}) {
-  const getActivePanelPath = usePanelStore(s => s.getActivePanelPath);
-  console.log(getActivePanelPath())
-  const toPanelId = Number.isInteger(panelId) ? panelId : 1;
-  const destParams = Number.isInteger(panelId) ? `?onPanel=${panelId}`: '';
-  
+function Welcome() {
+  const { getActivePanelId } = usePanelStore();
+  const toPanelId = getActivePanelId() ?? 0;
   const actions = [
     {
       label: "New Tab",
@@ -30,13 +27,13 @@ function Welcome({panelId}) {
     },
     {
       label: "Settings",
-      to: `/settings${destParams}`,
+      to: `/settings?onPanel=${toPanelId}`,
       icon: <Cog6ToothIcon className="w-5 h-5" />,
       color: "dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700",
     },
     {
       label: "Help",
-      to: `/docs${destParams}`,
+      to: `/docs?onPanel=${toPanelId}`,
       icon: <QuestionMarkCircleIcon className="w-5 h-5" />,
       color: "dark:bg-slate-800 bg-zinc-300 dark:text-gray-50 text-gray-800 hover:bg-zinc-200 hover:dark:bg-slate-700",
     },

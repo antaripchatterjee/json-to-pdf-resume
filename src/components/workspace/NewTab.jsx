@@ -9,6 +9,7 @@ function NewTab() {
   const navigate = useNavigate();
   const monaco = useMonaco();
   const addTab = usePanelStore(state => state.addTab);
+  const addPanel = usePanelStore(state => state.addPanel);
   const [searchParams, _] = useSearchParams();
 
   useEffect(() => {
@@ -20,19 +21,17 @@ function NewTab() {
       return navigate('/error/InvalidPanelId', { replace: true })
     }
     if (monaco) {
-      const newTabIndex = addTab(onPanelId, monaco, "json");
+      const targetPanelId = onPanelId === 0 ? addPanel() : onPanelId;
+      const newTabIndex = addTab(targetPanelId, monaco, "json");
       if (!newTabIndex) {
         console.warn('Could not create a new tab');
         navigate(`/error/CouldNotCreateNewTab`, { replace: true });
       } else {
-        navigate(`/workspace/${newTabIndex}?onPanel=${onPanelId}`, { replace: true })
+        navigate(`/workspace?onPanel=${targetPanelId}`, { replace: true })
       }
     }
-  }, [searchParams, addTab, monaco, navigate])
+  }, [searchParams, addPanel, addTab, monaco, navigate])
   
-
-
-
   return (
     <Loading message='Creating new tab...' />
   )

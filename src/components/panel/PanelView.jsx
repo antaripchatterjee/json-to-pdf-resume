@@ -11,7 +11,7 @@ function PanelView({ panelId }) {
       className="w-full h-full bg-muted flex items-center justify-center"
       onClick={() => setActivePanel(panelId)}
     >
-      <Outlet context={{ panelId }} />
+      My Panel {panelId}
     </div>
   );
 }

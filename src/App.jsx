@@ -183,8 +183,8 @@ function App() {
   };
 
   return (
-    <div className="max-w-screen min-w-screen min-h-screen max-h-screen">
-      <div className="w-screen h-screen mx-auto">
+    <div className="w-screen h-screen">
+      <div className="w-full h-full">
         <Branding />
         <div className='min-w-[250px] w-full h-[80%] px-4 py-2'>
           <BrowserRouter>
@@ -219,10 +219,6 @@ function App() {
                 <Route 
                   path="new" 
                   element={<NewTab />}
-                />
-                <Route 
-                  path=":tabIndexParam" 
-                  element={<div>TODO: Write logic open the tab in a proper panel</div>}
                 />
               </Route>
               <Route

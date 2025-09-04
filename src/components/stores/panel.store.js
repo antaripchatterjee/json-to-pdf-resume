@@ -2,83 +2,34 @@ import { create } from "zustand";
 import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
 import AutoIncrementalPanelIndex from "./utils/autoIncrementalPanelIndex";
 
-const RESERVED_EXPLORER_PANEL_ID_LEFT = AutoIncrementalPanelIndex.getNext();
-const RESERVED_EXPLORER_PANEL_ID_RIGHT = AutoIncrementalPanelIndex.getNext();
-const RESERVED_PDF_PREVIEWER_PANEL_ID_1 = AutoIncrementalPanelIndex.getNext();
-const RESERVED_PDF_PREVIEWER_PANEL_ID_2 = AutoIncrementalPanelIndex.getNext();
+export const RESERVED_ALL_TABS_PANEL = AutoIncrementalPanelIndex.getNext();
+export const RESERVED_WORKSPACE_PANEL = AutoIncrementalPanelIndex.getNext();
+export const RESERVED_PDF_PREVIEW_PANEL = AutoIncrementalPanelIndex.getNext();
 
-const RESERVED_WORKSPACE_PANEL_ID_1 = AutoIncrementalPanelIndex.reset(1024);
+const RESERVED_EDITOR_PANEL_START = AutoIncrementalPanelIndex.reset(1024);
 
-function findPaths(arr, matcher, maxMatch = -1) {
-  const results = [];
-
-  function helper(subArr, path) {
-    for (let i = 0; i < subArr.length; i++) {
-      const item = subArr[i];
-      const currentPath = [...path, i];
-
-      if (matcher(item)) {
-        results.push(currentPath);
-        if (maxMatch > -1 && results.length >= maxMatch) {
-          return true; // stop early
-        }
-      }
-
-      if (Array.isArray(item)) {
-        if (helper(item, currentPath)) {
-          return true; // propagate stop
-        }
-      }
-    }
-    return false;
-  }
-
-  helper(arr, []);
-  return results;
-}
 
 export const usePanelStore = create((set, get) => ({
   panels: [
-    [
-      {
-        id: RESERVED_EXPLORER_PANEL_ID_LEFT,
-        type: "utility",
-        name: "All Tabs",
-        classes: "explorer",
-        visibility: false,
-        siblingsAllowed: false,
-        objects: null,
-      },
-    ],
-    [
-      [
-        {
-          id: AutoIncrementalPanelIndex.getNext(),
-          type: "workspace",
-          classes: (self) => `editor-panel editor-panel-${self.id}`,
-          visibility: (self) => self.objects.tabStack.size > 0,
-          siblingsAllowed: true,
-          objects: {
-            tabs: new Map(),
-            tabStack: new Set(),
-          },
-        },
-      ],
-    ],
-    [
-      {
-        id: RESERVED_EXPLORER_PANEL_ID_RIGHT,
-        type: "utility",
-        name: "All Tabs",
-        classes: "explorer",
-        visibility: false,
-        siblingsAllowed: false,
-        objects: null,
-      },
-    ],
+    {
+      id: RESERVED_EDITOR_PANEL_START,
+      tabs: new Map(),
+      tabStack: new Set(),
+    }
   ],
+  activePanelId: RESERVED_EDITOR_PANEL_START,
 
-  activePanelPath: [0],
+  addPanel: () => {
+    const newPanelId = AutoIncrementalPanelIndex.getNext();
+    set((state) => ({
+      panels: [
+        ...structuredClone(state.panels),
+        { id: newPanelId, tabs: new Map(), tabStack: new Set() },
+      ],
+      activePanelId: newPanelId,
+    }));
+    return newPanelId;
+  },
 
   addTab: (panelId, monaco, langId, tabIndex) => {
     if (!monaco) return null;
@@ -237,35 +188,16 @@ export const usePanelStore = create((set, get) => ({
   },
 
   setActivePanel: (panelId) => {
-    const paths = findPaths(get().panels, (panel) => panel.id === panelId, 1);
-    if (paths.length === 0) {
-      return console.warn(`Could not find panel with id ${panelId}`);
-    }
-    set({
-      activePanelPath: [...paths[0]],
-    });
+    set({ activePanelId: panelId });
   },
-  getActivePanelPath: () => {
-    return get().activePanelPath;
+  getActivePanelId: () => {
+    return get().activePanelId;
   },
-  getPanelInfoByPath: (path) => {
-    let panelInfo = get().panels;
-    for (const path_index of path) {
-      panelInfo = panelInfo[path_index] ?? null;
-      if (!panelInfo) {
-        break;
-      }
-    }
-    return structuredClone(panelInfo);
+  getFirstPanelId: () => {
+    return get().panels.length > 0 ? get().panels[0].id : null;
   },
   isPanelVisible: (panelId) => {
-    return (
-      findPaths(
-        get().panels,
-        (panel) => panel?.id === panelId && panel?.tabStack?.size > 0,
-        1
-      ).length > 0
-    );
+    return get().panels.some((p) => p?.id === panelId && p?.tabStack?.size > 0);
   },
 }));
 

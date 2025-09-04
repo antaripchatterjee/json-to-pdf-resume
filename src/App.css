@@ -42,3 +42,31 @@
 .tab-btn:hover span {
   display: block;
 }
+
+.panel-grid {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 
+    calc(200px + var(--explorer-delta, 0px))
+    calc(400px - var(--explorer-delta, 0px) + var(--workspace-delta, 0px))
+    calc(400px - var(--workspace-delta, 0px));
+  grid-template-areas: "explorer workspace pdf";
+}
+
+
+.panel-grid > .panel-explorer {
+  grid-area: explorer;
+}
+
+.panel-grid > .panel-workspace {
+  grid-area: workspace;
+}
+
+.panel-grid > .panel-pdf {
+  grid-area: pdf;
+}
+
+
+/* .resize-handle {
+  transition: background-color 0.2s;
+} */
