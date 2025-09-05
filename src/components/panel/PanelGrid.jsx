@@ -1,11 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Outlet, useNavigate, useMatch } from "react-router";
-import { usePanelStore } from "../stores/panel.store";
-import {
-  RESERVED_ALL_TABS_PANEL,
-  RESERVED_WORKSPACE_PANEL,
-  RESERVED_PDF_PREVIEW_PANEL,
-} from "../stores/panel.store";
+import { usePanelStore, useLayoutStore } from "../stores/panel.store";
 import PanelGridItem from "./PanelGridItem";
 
 export default function PanelGrid() {
@@ -13,6 +8,15 @@ export default function PanelGrid() {
   const navigate = useNavigate();
 
   const { panels, isPanelVisible } = usePanelStore();
+  const { gridItems, gridTemplateColumns, gridTemplateAreas } =
+    useLayoutStore();
+  const { updateGridTemplateColumns } = useLayoutStore();
+
+  const gridItemContents = {
+    explorer: "All Tabs",
+    workspace: "Workspace",
+    pdf: "PDF Preview",
+  };
 
   const isWorkspaceRoot = useMatch("/workspace");
   const noTabsAnywhere = panels.every((p) => !isPanelVisible(p.id));
@@ -23,10 +27,18 @@ export default function PanelGrid() {
     }
   }, [noTabsAnywhere, isWorkspaceRoot, navigate]);
 
-  const updateDelta = (varName, delta) => {
-    if (gridRef.current) {
-      gridRef.current.style.setProperty(varName, `${delta}px`);
-    }
+  const beforeResize = () => {
+    // run updateGridTemplateColumn for all the children grid item with their offsetWidth
+    if (!gridRef.current) return;
+    const children = Array.from(
+      gridRef.current.querySelectorAll(".panel-grid-item")
+    );
+    
+    const newGridTemplateColumns = children.map((child) => {
+      const width = child.offsetWidth;
+      return `${width}px`;
+    });
+    updateGridTemplateColumns(newGridTemplateColumns);
   };
 
   const visiblePanels = panels.filter((p) => p?.tabStack?.size > 0);
@@ -37,35 +49,32 @@ export default function PanelGrid() {
   return (
     <div
       ref={gridRef}
-      className="h-full w-full panel-grid"
+      className="h-full w-full grid panel-grid"
       style={{
-        "--explorer-delta": "0px",
-        "--workspace-delta": "0px",
+        gridTemplateColumns: Array.isArray(gridTemplateColumns)
+          ? gridTemplateColumns.join(" ")
+          : "1fr 3fr 2fr",
+        gridTemplateAreas: Array.isArray(gridTemplateAreas)
+          ? `"${gridTemplateAreas.join(" ")}"`
+          : '"explorer workspace pdf"',
       }}
     >
-      <PanelGridItem
-        resizable={true}
-        onResize={(delta) => updateDelta("--explorer-delta", delta)}
-        panelName={"explorer"}
-        panelId={RESERVED_ALL_TABS_PANEL}
-      >
-        All Tabs
-      </PanelGridItem>
-      <PanelGridItem
-        panelId={RESERVED_WORKSPACE_PANEL}
-        resizable={true}
-        onResize={(delta) => updateDelta("--workspace-delta", delta)}
-        panelName={"workspace"}
-      >
-        Workspace
-      </PanelGridItem>
-      <PanelGridItem
-        panelId={RESERVED_PDF_PREVIEW_PANEL}
-        resizable={false}
-        panelName="pdf"
-      >
-        PDF Preview
-      </PanelGridItem>
+      {gridItems.filter((item) => gridTemplateAreas.includes(item.name))
+        .map((item, index) => (
+          <PanelGridItem
+            key={index}
+            index={index}
+            resizable={index > 0 && (item.horizontallyResizable || item.verticallyResizable)}
+            horizontallyResizable={item.horizontallyResizable}
+            verticallyResizable={item.verticallyResizable}
+            panelId={item.panelId}
+            panelName={item.name}
+            gridRef={gridRef}
+            beforeResize={beforeResize}
+          >
+            {gridItemContents[item.name]}
+          </PanelGridItem>
+        ))}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import clsx from "clsx";
 
-function PanelResizer({ orientation = "horizontal", onResize }) {
+function PanelResizer({ orientation = "horizontal", onResize, beforeResize }) {
   const startPosRef = useRef(0);
 
   function handleStart(e) {
@@ -16,6 +16,9 @@ function PanelResizer({ orientation = "horizontal", onResize }) {
     document.addEventListener("mouseup", handleEnd);
     document.addEventListener("touchmove", handleMove);
     document.addEventListener("touchend", handleEnd);
+    if (beforeResize) {
+      beforeResize();
+    }
   }
 
   function handleMove(e) {
@@ -24,7 +27,7 @@ function PanelResizer({ orientation = "horizontal", onResize }) {
       : (e.type.includes("mouse") ? e.pageY : e.touches[0].pageY);
 
     const delta = currentPos - startPosRef.current;
-
+    startPosRef.current = currentPos;
     if (onResize) {
       onResize(delta);
     }
@@ -39,8 +42,8 @@ function PanelResizer({ orientation = "horizontal", onResize }) {
 
   const orientationClass =
     orientation === "horizontal"
-      ? "horizontal-resize-handle cursor-ew-resize h-full w-0.5 right-0 top-0"
-      : "vertical-resize-handle cursor-ns-resize w-full h-0.5 bottom-0 left-0";
+      ? "horizontal-resize-handle cursor-ew-resize h-full w-0.5 left-0 top-0"
+      : "vertical-resize-handle cursor-ns-resize w-full h-0.5 bottom-0 right-0";
 
   return (
     <div
