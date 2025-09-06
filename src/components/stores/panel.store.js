@@ -202,23 +202,27 @@ export const usePanelStore = create((set, get) => ({
 
 export const useLayoutStore = create((set, get) => ({
   gridTemplateColumns: ["1fr", "3fr", "2fr"],
-  gridTemplateAreas: ["explorer", "workspace", "pdf"],
+  gridTemplateRows: ["1fr"],
+  gridTemplateMatrix: [["explorer", "workspace", "pdf"]],
   gridItems: [
     {
       panelId: RESERVED_ALL_TABS_PANEL,
       name: "explorer",
+      span: 1,
       horizontallyResizable: false,
       verticallyResizable: false,
     },
     {
       panelId: RESERVED_WORKSPACE_PANEL,
       name: "workspace",
+      span: 1,
       horizontallyResizable: true,
       verticallyResizable: false,
     },
     {
       panelId: RESERVED_PDF_PREVIEW_PANEL,
       name: "pdf",
+      span: 1,
       horizontallyResizable: true,
       verticallyResizable: false,
     },
@@ -234,8 +238,21 @@ export const useLayoutStore = create((set, get) => ({
       return { gridTemplateColumns: newGridTemplateColumns };
     });
   },
-  updateGridTemplateColumns: (newGridColumnTemplateMap) =>
+  updateGridTemplateColumns: (newGridTemplateColumns) =>
     set({
-      gridTemplateColumns: newGridColumnTemplateMap,
+      gridTemplateColumns: newGridTemplateColumns,
+    }),
+  updatePanelGridRowByIndex: (index, gridTemplateRow) => {
+    set((state) => {
+      const newGridTemplateRows = Array.isArray(state.gridTemplateRows)
+        ? [...state.gridTemplateRows]
+        : [];
+      newGridTemplateRows[index] = gridTemplateRow;
+      return { gridTemplateRows: newGridTemplateRows };
+    });
+  },
+  updateGridTemplateRows: (newGridTemplateRows) =>
+    set({
+      gridTemplateRows: newGridTemplateRows,
     }),
 }));

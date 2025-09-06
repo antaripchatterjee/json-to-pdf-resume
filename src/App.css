@@ -42,19 +42,3 @@
 .tab-btn:hover span {
   display: block;
 }
-
-.panel-grid {
-  grid-template-rows: 1fr;
-}
-
-.panel-grid > .panel-explorer {
-  grid-area: explorer;
-}
-
-.panel-grid > .panel-workspace {
-  grid-area: workspace;
-}
-
-.panel-grid > .panel-pdf {
-  grid-area: pdf;
-}
