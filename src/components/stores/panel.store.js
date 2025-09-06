@@ -200,35 +200,67 @@ export const usePanelStore = create((set, get) => ({
   },
 }));
 
-export const useLayoutStore = create((set, get) => ({
+const findNextHigher = (arr, key, value) => {
+  const higher = arr
+    .map(obj => obj[key])
+    .filter(v => v > value);
+
+  if (higher.length === 0) return -1;
+  return Math.min(...higher);
+}
+
+export const useGridLayoutStore = create((set, get) => ({
   gridTemplateColumns: ["1fr", "3fr", "2fr"],
   gridTemplateRows: ["1fr"],
-  gridTemplateMatrix: [["explorer", "workspace", "pdf"]],
+  // gridTemplateMatrix: [["explorer", "workspace", "pdf"]],
   gridItems: [
     {
       panelId: RESERVED_ALL_TABS_PANEL,
       name: "explorer",
-      span: 1,
+      visible: true,
+      row: 1,
+      column: 1,
       horizontallyResizable: false,
       verticallyResizable: false,
     },
     {
       panelId: RESERVED_WORKSPACE_PANEL,
       name: "workspace",
-      span: 1,
+      visible: true,
+      row: 1,
+      column: 2,
       horizontallyResizable: true,
       verticallyResizable: false,
     },
     {
       panelId: RESERVED_PDF_PREVIEW_PANEL,
       name: "pdf",
-      span: 1,
+      visible: true,
+      row: 1,
+      column: 3,
       horizontallyResizable: true,
       verticallyResizable: false,
     },
   ],
 
-  getGridTemplateColumns: () => get().gridTemplateColumns,
+  getGridLayout: () => {
+    const cols = get().gridTemplateColumns;
+    const rows = get().gridTemplateRows;
+    const gridItems = get().gridItems.filter(item =>
+      item.row <= rows.length && item.column <= cols.length && (item.visible ?? true)
+    );
+    const gridLayout = gridItems.map(item => ({
+      ...item,
+      columnLineStart: item.column,
+      columnLineEnd: findNextHigher(gridItems, 'column', item.column),
+      rowLineStart: item.row,
+      rowLineEnd: findNextHigher(gridItems, 'row', item.row),
+      supportResizability: !!(window.getComputedStyle),
+      horizontallyResizable: item.horizontallyResizable && item.column > 1,
+      verticallyResizable: item.verticallyResizable && item.row > 1,
+    }));
+    return { gridLayout };
+  },
   updatePanelGridColumnByIndex: (index, gridTemplateColumn) => {
     set((state) => {
       const newGridTemplateColumns = Array.isArray(state.gridTemplateColumns)
@@ -240,7 +272,7 @@ export const useLayoutStore = create((set, get) => ({
   },
   updateGridTemplateColumns: (newGridTemplateColumns) =>
     set({
-      gridTemplateColumns: newGridTemplateColumns,
+      gridTemplateColumns: [...newGridTemplateColumns],
     }),
   updatePanelGridRowByIndex: (index, gridTemplateRow) => {
     set((state) => {
@@ -253,6 +285,6 @@ export const useLayoutStore = create((set, get) => ({
   },
   updateGridTemplateRows: (newGridTemplateRows) =>
     set({
-      gridTemplateRows: newGridTemplateRows,
+      gridTemplateRows: [...newGridTemplateRows],
     }),
 }));

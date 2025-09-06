@@ -1,20 +1,14 @@
 import React, { useRef } from "react";
 import clsx from "clsx";
-import { useLayoutStore } from "../stores/panel.store";
+import { useGridLayoutStore } from "../stores/panel.store";
 
-function PanelResizer({
-  orientation = "horizontal",
-  panelName,
-  gridRef,
-  gridItemRef,
-}) {
+function PanelResizer({ orientation = "horizontal", gridRef, gridItemRef }) {
   const startPosRef = useRef(0);
-
-  const { gridTemplateAreas } = useLayoutStore();
+  const { gridTemplateColumns, gridTemplateRows } = useGridLayoutStore();
   const { updatePanelGridColumnByIndex, updatePanelGridRowByIndex } =
-    useLayoutStore();
+    useGridLayoutStore();
   const { updateGridTemplateColumns, updateGridTemplateRows } =
-    useLayoutStore();
+    useGridLayoutStore();
 
   if (orientation !== "horizontal" && orientation !== "vertical") {
     return null;
@@ -40,44 +34,87 @@ function PanelResizer({
   };
 
   const onResize = (delta) => {
-    const index = Array.isArray(gridTemplateAreas)
-      ? gridTemplateAreas.indexOf(panelName)
-      : -1;
-    if (index === -1 || !gridRef?.current || !gridItemRef.current) return;
+    if (!gridRef?.current || !gridItemRef.current) return;
+    const computerStyle = window.getComputedStyle(gridItemRef.current);
     const { width, height } = gridRef.current.getBoundingClientRect();
     if (orientation === "horizontal") {
       const itemsTotalWidth = Array.from(
         gridRef.current.querySelectorAll(".panel-grid-item")
       ).reduce((acc, item) => acc + item.offsetWidth, 0);
       if (itemsTotalWidth <= 0) return;
+      const gridColumnStart = parseInt(
+        computerStyle.getPropertyValue("grid-column-start").trim(),
+        10
+      );
+      const gridColumnEnd = parseInt(
+        computerStyle.getPropertyValue("grid-column-end").trim(),
+        10
+      );
+      if (gridColumnStart <= 1 || gridColumnEnd < -1) return;
       const newGridTemplateColumn =
         gridItemRef.current.offsetWidth -
-        (itemsTotalWidth > width ? (itemsTotalWidth - width) : delta);
-      updatePanelGridColumnByIndex(index, `${newGridTemplateColumn}px`);
-      if (gridItemRef.current.previousElementSibling) {
-        updatePanelGridColumnByIndex(index - 1, "1fr");
-      }
+        (itemsTotalWidth > width ? itemsTotalWidth - width : delta);
+      const startIndex = gridColumnStart - 1;
+      const distributedWidth =
+        newGridTemplateColumn /
+        (gridColumnEnd === -1
+          ? gridTemplateColumns.slice(startIndex)
+          : gridTemplateColumns.slice(startIndex, gridColumnEnd - 1)
+        ).length;
+      [...gridTemplateColumns].forEach((_, index) => {
+        if (
+          index >= startIndex &&
+          (gridColumnEnd === -1 || index < gridColumnEnd - 1)
+        ) {
+          updatePanelGridColumnByIndex(index, `${distributedWidth}px`);
+        } else if (index === startIndex - 1) {
+          updatePanelGridColumnByIndex(index, "1fr");
+        }
+      });
     } else {
       const itemsTotalHeight = Array.from(
         gridRef.current.querySelectorAll(".panel-grid-item")
       ).reduce((acc, item) => acc + item.offsetHeight, 0);
       if (itemsTotalHeight <= 0) return;
+      const gridRowStart = parseInt(
+        computerStyle.getPropertyValue("grid-row-start").trim(),
+        10
+      );
+      const gridRowEnd = parseInt(
+        computerStyle.getPropertyValue("grid-row-end").trim(),
+        10
+      );
+      if (gridRowStart <= 1 || gridRowEnd < -1) return;
       const newGridTemplateRow =
         gridItemRef.current.offsetHeight -
-        (itemsTotalHeight > height ? (itemsTotalHeight - height) : delta);
-      updatePanelGridRowByIndex(index, `${newGridTemplateRow}px`);
-      if (gridItemRef.current.previousElementSibling) {
-        updatePanelGridRowByIndex(index - 1, "1fr");
-      }
+        (itemsTotalHeight > height ? itemsTotalHeight - height : delta);
+      const startIndex = gridRowStart - 1;
+      const distributedHeight =
+        newGridTemplateRow /
+        (gridRowEnd === -1
+          ? gridTemplateRows.slice(startIndex)
+          : gridTemplateRows.slice(startIndex, gridRowEnd - 1)
+        ).length;
+      [...gridTemplateRows].forEach((_, index) => {
+        if (
+          index >= startIndex &&
+          (gridRowEnd === -1 || index < gridRowEnd - 1)
+        ) {
+          updatePanelGridRowByIndex(index, `${distributedHeight}px`);
+        } else if (index === startIndex - 1) {
+          updatePanelGridRowByIndex(index, "1fr");
+        }
+      });
     }
   };
 
   function handleStart(e) {
     e.preventDefault();
-
-    gridRef?.current?.classList?.add(
+    if (!gridRef?.current) return;
+    gridRef.current?.classList?.add(
       orientation === "horizontal" ? "cursor-ew-resize" : "cursor-ns-resize"
     );
+    beforeResize();
 
     startPosRef.current =
       orientation === "horizontal"
@@ -92,7 +129,6 @@ function PanelResizer({
     document.addEventListener("mouseup", handleEnd);
     document.addEventListener("touchmove", handleMove);
     document.addEventListener("touchend", handleEnd);
-    beforeResize();
   }
 
   function handleMove(e) {

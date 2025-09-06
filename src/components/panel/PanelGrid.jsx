@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Outlet, useNavigate, useMatch } from "react-router";
-import { usePanelStore, useLayoutStore } from "../stores/panel.store";
+import { usePanelStore, useGridLayoutStore } from "../stores/panel.store";
 import PanelGridItem from "./PanelGridItem";
 
 export default function PanelGrid() {
@@ -8,8 +8,8 @@ export default function PanelGrid() {
   const navigate = useNavigate();
 
   const { panels, isPanelVisible } = usePanelStore();
-  const { gridItems, gridTemplateRows, gridTemplateColumns, gridTemplateMatrix } =
-    useLayoutStore();
+  const { gridTemplateColumns, gridTemplateRows } = useGridLayoutStore();
+  const { getGridLayout } = useGridLayoutStore();
 
   const gridItemContents = {
     explorer: "All Tabs",
@@ -31,8 +31,8 @@ export default function PanelGrid() {
     return <Outlet />;
   }
 
-  const gridCellCount = gridTemplateColumns.length * gridTemplateRows.length;
 
+  const { gridLayout } = getGridLayout();
 
   return (
     <div
@@ -41,20 +41,27 @@ export default function PanelGrid() {
       style={{
         gridTemplateColumns: gridTemplateColumns.join(" "),
         gridTemplateRows: gridTemplateRows.join(" "),
-        gridTemplateAreas: gridTemplateMatrix.map(
-          gridTemplateAreas => `"${gridTemplateAreas.join(" ")}"`).join("\n")
+        // gridTemplateAreas: gridTemplateMatrix.map(
+        //   gridTemplateAreas => `"${gridTemplateAreas.join(" ")}"`).join("\n")
       }}
     >
-      {gridItems.filter((item) => gridTemplateMatrix.flat().includes(item.name))
-        .map((item, index) => (
+      {gridLayout.map((item, index) => (
           <PanelGridItem
             key={index}
-            resizable={index > 0 && (item.horizontallyResizable || item.verticallyResizable)}
+            gridRef={gridRef}
+            resizable={item.supportResizability && (item.horizontallyResizable || item.verticallyResizable)}
             horizontallyResizable={item.horizontallyResizable}
             verticallyResizable={item.verticallyResizable}
             panelId={item.panelId}
             panelName={item.name}
-            gridRef={gridRef}
+            gridRow={{
+              start: item.rowLineStart,
+              end: item.rowLineEnd
+            }}
+            gridColumn={{
+              start: item.columnLineStart,
+              end: item.columnLineEnd
+            }}
           >
             {gridItemContents[item.name]}
           </PanelGridItem>

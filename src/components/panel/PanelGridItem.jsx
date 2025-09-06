@@ -3,14 +3,14 @@ import clsx from "clsx";
 import PanelResizer from "./PanelResizer";
 
 function PanelGridItem({
+  gridRef,
   resizable = false,
   horizontallyResizable = true,
   verticallyResizable = false,
-  panelId,
-  panelName,
   children,
+  gridRow,
+  gridColumn,
   className,
-  gridRef
 }) {
   const gridItemRef = React.useRef(null);
   
@@ -18,7 +18,11 @@ function PanelGridItem({
     <div
       ref={gridItemRef}
       style={{
-        gridArea: panelName || `panel_${panelId}`,
+        // gridArea: panelName || `panel_${panelId}`,
+        gridRowStart: gridRow?.start,
+        gridRowEnd: gridRow?.end,
+        gridColumnStart: gridColumn?.start,
+        gridColumnEnd: gridColumn?.end,
       }}
       className={clsx(
         "relative panel-grid-item",
@@ -30,7 +34,6 @@ function PanelGridItem({
           orientation="horizontal"
           gridRef={gridRef}
           gridItemRef={gridItemRef}
-          panelName={panelName || `panel_${panelId}`}
         />
       )}
       {resizable && verticallyResizable && (
@@ -38,7 +41,6 @@ function PanelGridItem({
           orientation="vertical"
           gridRef={gridRef}
           gridItemRef={gridItemRef}
-          panelName={panelName || `panel_${panelId}`}
         />
       )}
       {children}
