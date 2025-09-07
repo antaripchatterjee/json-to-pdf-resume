@@ -201,18 +201,15 @@ export const usePanelStore = create((set, get) => ({
 }));
 
 const findNextHigher = (arr, key, value) => {
-  const higher = arr
-    .map(obj => obj[key])
-    .filter(v => v > value);
+  const higher = arr.map((obj) => obj[key]).filter((v) => v > value);
 
   if (higher.length === 0) return -1;
   return Math.min(...higher);
-}
+};
 
 export const useGridLayoutStore = create((set, get) => ({
   gridTemplateColumns: ["1fr", "3fr", "2fr"],
   gridTemplateRows: ["1fr"],
-  // gridTemplateMatrix: [["explorer", "workspace", "pdf"]],
   gridItems: [
     {
       panelId: RESERVED_ALL_TABS_PANEL,
@@ -220,7 +217,7 @@ export const useGridLayoutStore = create((set, get) => ({
       visible: true,
       row: 1,
       column: 1,
-      horizontallyResizable: false,
+      horizontallyResizable: true,
       verticallyResizable: false,
     },
     {
@@ -228,7 +225,7 @@ export const useGridLayoutStore = create((set, get) => ({
       name: "workspace",
       visible: true,
       row: 1,
-      column: 2,
+      column: 3,
       horizontallyResizable: true,
       verticallyResizable: false,
     },
@@ -237,29 +234,44 @@ export const useGridLayoutStore = create((set, get) => ({
       name: "pdf",
       visible: true,
       row: 1,
-      column: 3,
-      horizontallyResizable: true,
-      verticallyResizable: false,
+      column: 4,
     },
   ],
 
   getGridLayout: () => {
-    const cols = get().gridTemplateColumns;
-    const rows = get().gridTemplateRows;
-    const gridItems = get().gridItems.filter(item =>
-      item.row <= rows.length && item.column <= cols.length && (item.visible ?? true)
-    );
-    const gridLayout = gridItems.map(item => ({
-      ...item,
-      columnLineStart: item.column,
-      columnLineEnd: findNextHigher(gridItems, 'column', item.column),
-      rowLineStart: item.row,
-      rowLineEnd: findNextHigher(gridItems, 'row', item.row),
-      supportResizability: !!(window.getComputedStyle),
-      horizontallyResizable: item.horizontallyResizable && item.column > 1,
-      verticallyResizable: item.verticallyResizable && item.row > 1,
-    }));
-    return { gridLayout };
+    const gridItems = [...get().gridItems];
+    let expectedColumnLine = 1;
+    let expectedRowLine = 1;
+    const gridLayout = gridItems.map((item) => {
+      const declaredColumnStart = item.column;
+      const declaredRowStart = item.row;
+      const columnLineStart = Math.min(expectedColumnLine, declaredColumnStart);
+      const columnLineEnd = findNextHigher(
+        gridItems,
+        "column",
+        columnLineStart
+      );
+      const rowLineStart = Math.min(expectedRowLine, declaredRowStart);
+      const rowLineEnd = findNextHigher(gridItems, "row", rowLineStart);
+      if (rowLineEnd !== -1) {
+        expectedRowLine = rowLineEnd + 1;
+      }
+      if (columnLineEnd !== -1) {
+        expectedColumnLine = columnLineEnd + 1;
+      }
+      return {
+        ...item,
+        columnLineStart,
+        columnLineEnd,
+        rowLineStart,
+        rowLineEnd,
+        supportResizability: !!window.getComputedStyle,
+        horizontallyResizable:
+          columnLineEnd !== -1 && item.horizontallyResizable,
+        verticallyResizable: rowLineEnd !== -1 && item.verticallyResizable,
+      };
+    });
+    return gridLayout;
   },
   updatePanelGridColumnByIndex: (index, gridTemplateColumn) => {
     set((state) => {
@@ -287,4 +299,20 @@ export const useGridLayoutStore = create((set, get) => ({
     set({
       gridTemplateRows: [...newGridTemplateRows],
     }),
+  trimZeroPxTemplateColumns: () => {
+    const gridTemplateColumns = get().gridTemplateColumns;
+
+    const lastNonZero = gridTemplateColumns.findLastIndex((v) => v !== "0px");
+    const trimmed = gridTemplateColumns.slice(0, lastNonZero + 1);
+
+    set({ gridTemplateColumns: trimmed });
+  },
+  trimZeroPxTemplateRows: () => {
+    const gridTemplateRows = get().gridTemplateRows;
+
+    const lastNonZero = gridTemplateRows.findLastIndex((v) => v !== "0px");
+    const trimmed = gridTemplateRows.slice(0, lastNonZero + 1);
+
+    set({ gridTemplateRows: trimmed });
+  },
 }));

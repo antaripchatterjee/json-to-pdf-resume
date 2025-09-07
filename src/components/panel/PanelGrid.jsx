@@ -32,17 +32,15 @@ export default function PanelGrid() {
   }
 
 
-  const { gridLayout } = getGridLayout();
+  const gridLayout = getGridLayout();
 
   return (
     <div
       ref={gridRef}
-      className="h-full w-full grid panel-grid"
+      className="h-full w-full grid panel-grid auto-cols-[0] auto-rows-[0] overflow-hidden"
       style={{
         gridTemplateColumns: gridTemplateColumns.join(" "),
         gridTemplateRows: gridTemplateRows.join(" "),
-        // gridTemplateAreas: gridTemplateMatrix.map(
-        //   gridTemplateAreas => `"${gridTemplateAreas.join(" ")}"`).join("\n")
       }}
     >
       {gridLayout.map((item, index) => (

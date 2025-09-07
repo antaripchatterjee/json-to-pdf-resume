@@ -8,6 +8,7 @@ function PanelGridItem({
   horizontallyResizable = true,
   verticallyResizable = false,
   children,
+  panelName,
   gridRow,
   gridColumn,
   className,
@@ -18,7 +19,6 @@ function PanelGridItem({
     <div
       ref={gridItemRef}
       style={{
-        // gridArea: panelName || `panel_${panelId}`,
         gridRowStart: gridRow?.start,
         gridRowEnd: gridRow?.end,
         gridColumnStart: gridColumn?.start,
@@ -26,7 +26,8 @@ function PanelGridItem({
       }}
       className={clsx(
         "relative panel-grid-item",
-        className
+        className,
+        `panel-${panelName}`
       )}
     >
       {resizable && horizontallyResizable && (
