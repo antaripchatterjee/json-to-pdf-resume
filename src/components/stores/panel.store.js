@@ -3,6 +3,7 @@ import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
 import AutoIncrementalPanelIndex from "./utils/autoIncrementalPanelIndex";
 
 export const RESERVED_ALL_TABS_PANEL = AutoIncrementalPanelIndex.getNext();
+export const RESERVED_AI_AGNET_PANEL = AutoIncrementalPanelIndex.getNext();
 export const RESERVED_WORKSPACE_PANEL = AutoIncrementalPanelIndex.getNext();
 export const RESERVED_PDF_PREVIEW_PANEL = AutoIncrementalPanelIndex.getNext();
 
@@ -200,8 +201,10 @@ export const usePanelStore = create((set, get) => ({
   },
 }));
 
-const findNextHigher = (arr, key, value) => {
-  const higher = arr.map((obj) => obj[key]).filter((v) => v > value);
+const findNextHigher = (arr, key, value, cond) => {
+  const higher = arr
+    .filter((obj) => cond(obj["column"]) && obj[key] > value)
+    .map((obj) => obj[key]);
 
   if (higher.length === 0) return -1;
   return Math.min(...higher);
@@ -209,12 +212,20 @@ const findNextHigher = (arr, key, value) => {
 
 export const useGridLayoutStore = create((set, get) => ({
   gridTemplateColumns: ["1fr", "3fr", "2fr"],
-  gridTemplateRows: ["1fr"],
+  gridTemplateRows: ["1fr", "1fr"],
   gridItems: [
     {
       panelId: RESERVED_ALL_TABS_PANEL,
       name: "explorer",
       row: 1,
+      column: 1,
+      horizontallyResizable: true,
+      verticallyResizable: true,
+    },
+    {
+      panelId: RESERVED_AI_AGNET_PANEL,
+      name: "agent",
+      row: 2,
       column: 1,
       horizontallyResizable: true,
       verticallyResizable: false,
@@ -232,7 +243,7 @@ export const useGridLayoutStore = create((set, get) => ({
       name: "pdf",
       row: 1,
       column: 3,
-      className: "min-w-40"
+      className: "min-w-40",
     },
   ],
 
@@ -247,10 +258,16 @@ export const useGridLayoutStore = create((set, get) => ({
       const columnLineEnd = findNextHigher(
         gridItems,
         "column",
-        columnLineStart
+        columnLineStart,
+        () => true
       );
       const rowLineStart = Math.min(expectedRowLine, declaredRowStart);
-      const rowLineEnd = findNextHigher(gridItems, "row", rowLineStart);
+      const rowLineEnd = findNextHigher(
+        gridItems,
+        "row",
+        rowLineStart,
+        (colStart) => colStart === columnLineStart
+      );
       if (rowLineEnd !== -1) {
         expectedRowLine = rowLineEnd + 1;
       }

@@ -15,6 +15,7 @@ export default function PanelGrid() {
     explorer: "All Tabs",
     workspace: "Workspace",
     pdf: "PDF Preview",
+    agent: "AI Agent"
   };
 
   const isWorkspaceRoot = useMatch("/workspace");
