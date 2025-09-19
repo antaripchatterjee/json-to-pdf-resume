@@ -214,7 +214,6 @@ export const useGridLayoutStore = create((set, get) => ({
     {
       panelId: RESERVED_ALL_TABS_PANEL,
       name: "explorer",
-      visible: true,
       row: 1,
       column: 1,
       horizontallyResizable: true,
@@ -223,18 +222,17 @@ export const useGridLayoutStore = create((set, get) => ({
     {
       panelId: RESERVED_WORKSPACE_PANEL,
       name: "workspace",
-      visible: true,
       row: 1,
-      column: 3,
+      column: 2,
       horizontallyResizable: true,
       verticallyResizable: false,
     },
     {
       panelId: RESERVED_PDF_PREVIEW_PANEL,
       name: "pdf",
-      visible: true,
       row: 1,
-      column: 4,
+      column: 3,
+      className: "min-w-40"
     },
   ],
 

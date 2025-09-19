@@ -27,7 +27,7 @@ function PanelResizer({ orientation = "horizontal", gridRef, gridItemRef }) {
     return null;
   }
 
-  const getNextGridItemStartAndEnd = (currentStart, expectedStart) => {
+  const getNextGridItemStyle = (currentStart, expectedStart) => {
     if (currentStart < 1 || expectedStart < currentStart) {
       return {};
     }
@@ -49,11 +49,31 @@ function PanelResizer({ orientation = "horizontal", gridRef, gridItemRef }) {
           : computedStyle.gridRowEnd,
         10
       );
+      const minWidthStr = computedStyle.minWidth;
+      const minWidth = ["auto", "none", ""].includes(
+        minWidthStr.toLocaleUpperCase()
+      )
+        ? 0
+        : parseFloat(minWidthStr);
+      const minHeightStr = computedStyle.minHeight;
+      const minHeight = ["auto", "none", ""].includes(
+        minHeightStr.toLocaleUpperCase()
+      )
+        ? 0
+        : parseFloat(minHeightStr);
+
       if (start === currentStart) {
         isNextOne = true;
       } else if (isNextOne) {
         if (start === expectedStart) {
-          return { start, end, width: gridItem.offsetWidth };
+          return {
+            start,
+            end,
+            width: gridItem.offsetWidth,
+            minWidth: (!Number.isNaN(minWidth) && minWidth) || 0,
+            height: gridItem.offsetHeight,
+            minHeight: (!Number.isNaN(minHeight) && minHeight) || 0,
+          };
         }
         break;
       }
@@ -193,15 +213,16 @@ function PanelResizer({ orientation = "horizontal", gridRef, gridItemRef }) {
         10
       );
       if (gridColumnStart < 1 || gridColumnEnd <= 0) return;
+      const gridColumnMinWidth = computedStyle.minWidth;
       const {
         start: nextGridColumnStart,
         end: nextGridColumnEnd,
         width: nextGridColumnWidth,
-      } = getNextGridItemStartAndEnd(gridColumnStart, gridColumnEnd);
+        minWidth: nextGridColumnMinWidth,
+      } = getNextGridItemStyle(gridColumnStart, gridColumnEnd);
       if (!nextGridColumnStart) {
         return;
       }
-      console.log(`Condition -> ${itemsTotalWidth > width}`);
       const newGridTemplateColumn = gridItemRef.current.offsetWidth + delta;
       const startIndex = gridColumnStart - 1;
       const endIndex = gridColumnEnd - 1;
@@ -220,6 +241,18 @@ function PanelResizer({ orientation = "horizontal", gridRef, gridItemRef }) {
               nextGridColumnEnd - 1
             )
         ).length;
+      console.log({
+        gridColumnStart,
+        gridColumnEnd,
+        gridColumnMinWidth,
+        newGridTemplateColumn,
+        selfDistributedWidth,
+        nextGridColumnStart,
+        nextGridColumnEnd,
+        nextGridColumnMinWidth,
+        nextGridTemplateColumm,
+        nextDistributedWidth,
+      });
       [...gridTemplateColumnsRef.current].forEach((_, index) => {
         if (index >= startIndex && index < endIndex) {
           updatePanelGridColumnByIndex(index, `${selfDistributedWidth}px`);
@@ -260,7 +293,7 @@ function PanelResizer({ orientation = "horizontal", gridRef, gridItemRef }) {
         start: nextGridRowStart,
         end: nextGridRowEnd,
         width: nextGridRowHeight, // width -> height in vertical mode
-      } = getNextGridItemStartAndEnd(gridRowStart, gridRowEnd);
+      } = getNextGridItemStyle(gridRowStart, gridRowEnd);
       if (!nextGridRowStart) {
         return;
       }

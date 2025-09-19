@@ -50,7 +50,7 @@ export default function PanelGrid() {
             resizable={item.supportResizability && (item.horizontallyResizable || item.verticallyResizable)}
             horizontallyResizable={item.horizontallyResizable}
             verticallyResizable={item.verticallyResizable}
-            panelId={item.panelId}
+            className={item.className}
             panelName={item.name}
             gridRow={{
               start: item.rowLineStart,
