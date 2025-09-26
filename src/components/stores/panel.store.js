@@ -266,7 +266,7 @@ export const useGridLayoutStore = create((set, get) => ({
         gridItems,
         "row",
         rowLineStart,
-        (colStart) => colStart === columnLineStart
+        (column) => column === columnLineStart
       );
       if (rowLineEnd !== -1) {
         expectedRowLine = rowLineEnd + 1;
@@ -286,6 +286,7 @@ export const useGridLayoutStore = create((set, get) => ({
         verticallyResizable: rowLineEnd !== -1 && item.verticallyResizable,
       };
     });
+    console.log(gridLayout)
     return gridLayout;
   },
   updatePanelGridColumnByIndex: (index, gridTemplateColumn) => {
