@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import AutoIncrementalTabIndex from "./utils/autoIncrementalTabIndex";
 import AutoIncrementalPanelIndex from "./utils/autoIncrementalPanelIndex";
+import PanelNode from "./utils/panelNode";
 
 export const RESERVED_ALL_TABS_PANEL = AutoIncrementalPanelIndex.getNext();
 export const RESERVED_AI_AGNET_PANEL = AutoIncrementalPanelIndex.getNext();
@@ -246,8 +247,45 @@ export const useGridLayoutStore = create((set, get) => ({
       className: "min-w-40",
     },
   ],
+  gridContent: PanelNode.objectToPanelNode(
+    null,
+    {
+      placement: "aligned",
+      gridTemplate: ["1fr", "3fr", "2fr"],
+      panelName: "root",
+      children: [
+        {
+          placement: "stacked",
+          gridTemplate: ["1fr", "1fr"],
+          panelName: "left_drawer",
+          gridStart: 1,
+          children: [
+            {
+              gridStart: 1,
+              panelName: "all_tabs",
+            },
+            {
+              gridStart: 2,
+              panelName: "ai_agent"
+            }
+          ]
+        },
+        {
+          gridStart: 2,
+          panelName: "workspace"
+        },
+        {
+          gridStart: 3,
+          panelName: "pdf_viewer",
+          className: "min-w-40"
+        }
+      ]
+    }
+  ),
 
   getGridLayout: () => {
+    const gridContent = structuredClone(get().gridContent);
+    console.log(gridContent)
     const gridItems = [...get().gridItems];
     let expectedColumnLine = 1;
     let expectedRowLine = 1;
@@ -286,7 +324,6 @@ export const useGridLayoutStore = create((set, get) => ({
         verticallyResizable: rowLineEnd !== -1 && item.verticallyResizable,
       };
     });
-    console.log(gridLayout)
     return gridLayout;
   },
   updatePanelGridColumnByIndex: (index, gridTemplateColumn) => {
